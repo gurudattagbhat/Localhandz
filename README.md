@@ -20,6 +20,7 @@ Local Handz is a comprehensive web application that connects customers with loca
 - **PHP 7.4+** with extensions: `pdo_mysql`, `openssl`, `mbstring`
 - **MySQL 5.7+** or **MariaDB 10.2+**
 - **Composer** (for dependency management)
+- **PHP Mailer** (not included please install files before use)
 
 ### Installation
 
@@ -213,6 +214,7 @@ All database connections pre-configured for local development.
 ## 🐛 Troubleshooting
 
 ### Email Issues
+- **install php mailer files** before using email features please install php mailer files
 - **Emails not sending**: Check Gmail app password in PHP files
 - **SMTP errors**: Verify Gmail 2FA is enabled and app password is correct
 - **Delivery issues**: Check spam folder, verify recipient addresses
@@ -272,8 +274,7 @@ All database connections pre-configured for local development.
 - **Google reCAPTCHA**: Google Terms of Service
 
 ### Project License
-This project is open source. See individual file headers for specific licensing information.
-
+This project is developed by Gurudatta G Bhat please ask developer before reuse all rights reserved and project is owned by Gurudatta G Bhat
 ---
 
 ## 📞 Support
