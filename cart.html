@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .cart-container { max-width: 900px; margin: 2rem auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 2rem; }
+        .cart-header { text-align: center; margin-bottom: 2rem; }
+        .cart-item { display: flex; gap: 2rem; align-items: flex-start; border-bottom: 1px solid #eee; padding: 1.5rem 0; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; }
+        .cart-info { flex: 1; }
+        .cart-info h3 { margin: 0 0 0.5rem 0; }
+        .cart-info .provider-name { color: #555; margin-bottom: 0.5rem; }
+        .cart-info .cart-price { color: #28a745; font-weight: 600; margin-bottom: 0.5rem; }
+        .cart-info .cart-category { color: #888; font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .cart-booking-form { margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-group label { color: #333; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { padding: 0.75rem; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; }
+        .booking-btn { background: #28a745; color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .booking-btn:hover { background: #218838; }
+        .remove-btn { background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+        .remove-btn:hover { background: #b52a37; }
+        .success-message { color: green; text-align: center; margin-top: 0.5rem; display: none; }
+        .empty-cart { text-align: center; color: #888; margin: 3rem 0; }
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #333;
+            color: #fff;
+        }
+        main, .cart-container {
+            margin-top: 150px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="navbar" style="display:flex;align-items:center;">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <div class="navbar-left" style="display:flex;align-items:center;gap:1.5rem;margin-left:1.5rem;">
+                <ul style="display:flex;gap:1.5rem;list-style:none;margin:0;padding:0;">
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+                <div class="profile-icon" id="profile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li id="login-option"><a href="login.html">Login</a></li>
+                    <li><a href="register.html">Sign Up</a></li>
+                    <li><a href="register-service-provider.html">Register as Service Provider</a></li>
+                    <li><a href="#" id="logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="cart-container">
+            <div style="text-align:right;margin-bottom:1.5rem;">
+                <a href="index.html" class="booking-btn" style="background:#007bff;color:#fff;padding:0.7rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;">Continue Booking</a>
+            </div>
+            <div class="cart-header">
+                <h1>Your Cart</h1>
+            </div>
+            <div id="cart-items"></div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cartItemsContainer = document.getElementById('cart-items');
+
+        // Fetch and render cart items
+        async function fetchCart() {
+            const response = await fetch('cart_api.php?action=fetch');
+            const data = await response.json();
+            if (!data.success) {
+                cartItemsContainer.innerHTML = `<div class="empty-cart">You must <a href='login.html' style='color:#007bff;text-decoration:underline;'>log in</a> to view your cart.</div>`;
+                return;
+            }
+            renderCartItems(data.cart);
+        }
+
+        // Render cart items
+        function renderCartItems(cart) {
+            cartItemsContainer.innerHTML = '';
+            if (!cart || cart.length === 0) {
+                cartItemsContainer.innerHTML = '<div class="empty-cart">Your cart is empty.</div>';
+                return;
+            }
+            cart.forEach(item => {
+                let priceDisplay = 'N/A';
+                if (typeof item.price === 'number') {
+                    priceDisplay = item.price.toFixed(2);
+                } else if (!isNaN(parseFloat(item.price))) {
+                    priceDisplay = parseFloat(item.price).toFixed(2);
+                }
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <img src="${item.photo || 'images/default-provider.jpg'}" alt="${item.service_name || 'Service'}">
+                    <div class="cart-info">
+                        <h3>${item.service_name || 'Service unavailable'}</h3>
+                        <div class="provider-name">Provider: ${item.provider_name || 'N/A'}</div>
+                        <div class="cart-price">₹${priceDisplay}</div>
+                        <button class="booking-btn" data-service="${item.service_id}" data-provider="${item.provider_id}">Book Now</button>
+                        <button class="remove-btn" data-id="${item.id}">Remove</button>
+                    </div>
+                `;
+                cartItemsContainer.appendChild(div);
+            });
+
+            // Attach event listeners for Book Now and Remove
+            cartItemsContainer.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.onclick = async function() {
+                    const id = this.getAttribute('data-id');
+                    await fetch('cart_api.php?action=remove', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id })
+                    });
+                    fetchCart();
+                };
+            });
+
+            cartItemsContainer.querySelectorAll('.booking-btn').forEach(btn => {
+                btn.onclick = function() {
+                    const serviceId = btn.getAttribute('data-service');
+                    const providerId = btn.getAttribute('data-provider');
+                    window.location.href = `provider_details.html?service_id=${serviceId}&provider_id=${providerId}&from_cart=1`;
+                };
+            });
+        }
+
+        fetchCart();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,694 @@
+/* Global Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e3e9f3 100%);
+    color: #222;
+    min-height: 100vh;
+}
+
+/* Header */
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem 2rem;
+}
+
+/* Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #333;
+    color: #fff;
+}
+
+/* Logo Styling */
+.logo-img {
+    height: 70px;
+    background: transparent;
+    display: block;
+}
+
+.logo {
+    flex: 1; /* Push the logo to the left */
+}
+
+/* Navbar Links */
+.navbar ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar ul li {
+    position: relative;
+}
+
+.navbar ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.navbar ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Search Bar and Location Container */
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+/* Location Dropdown Styling */
+.location-dropdown select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #333;
+    outline: none;
+    cursor: pointer;
+    width: 150px; /* Adjust width */
+}
+
+.location-dropdown select:focus {
+    border-color: #007bff;
+}
+
+/* Location Search Styling */
+.location-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.location-search input {
+    width: 250px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 1rem;
+    outline: none;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.location-search input[readonly] {
+    background-color: #f0f0f0; /* Light gray for readonly state */
+    cursor: not-allowed;
+}
+
+.location-search input:not([readonly]) {
+    background-color: #fff; /* White for editable state */
+    cursor: text;
+}
+
+.location-search button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 20px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.location-search button i {
+    font-size: 1.2rem;
+}
+
+.location-search button:hover {
+    background-color: #0056b3;
+}
+
+/* White Theme Button Styling */
+.white-theme-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background-color: #fff; /* White background */
+    color: #333;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.white-theme-button i {
+    font-size: 1.2rem;
+}
+
+.white-theme-button:hover {
+    background-color: #f0f0f0; /* Light gray on hover */
+    color: #007bff; /* Blue text on hover */
+}
+
+/* Right-side container for icons and navigation */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1; /* Push the navbar-right content to the right */
+    position: relative; /* Ensure dropdown is positioned relative to this container */
+}
+
+/* Navigation Links Styling */
+.navbar-right nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-right nav ul li {
+    position: relative;
+}
+
+.navbar-right nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.navbar-right nav ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Cart Icon Styling */
+.cart-icon {
+    position: relative;
+    font-size: 1.5rem;
+    color: #fff;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+
+.cart-icon .cart-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: red;
+    color: white;
+    font-size: 0.8rem;
+    border-radius: 50%;
+    padding: 2px 6px;
+}
+
+/* Profile Icon Styling */
+.profile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #fff;
+    position: relative;
+    width: 40px; /* Ensure clickable area */
+    height: 40px; /* Ensure clickable area */
+}
+
+.profile-icon img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Dropdown Menu Styling */
+.dropdown-menu {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 100%; /* Position below the Profile link */
+    right: 0;
+    background-color: #444; /* Dark background for better visibility */
+    color: #fff; /* White text for better contrast */
+    list-style: none;
+    padding: 1rem;
+    margin: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+    border-radius: 4px;
+    z-index: 1000;
+    min-width: 150px; /* Ensure the dropdown has a minimum width */
+    opacity: 0;  /* Make it invisible */
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Show dropdown when 'show' class is added */
+.dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Dropdown Menu Items */
+.dropdown-menu li {
+    padding: 0.5rem 1rem;
+}
+
+.dropdown-menu li a {
+    color: #fff; /* White text color for better visibility */
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: block;
+}
+
+.dropdown-menu li a:hover {
+    background-color: #666; /* Slightly lighter background on hover */
+    border-radius: 4px;
+}
+
+/* Responsive Navbar */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .navbar ul {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .search-bar {
+        width: 100%;
+    }
+
+    .dropdown-menu {
+        right: auto;
+        left: 0;
+        width: 100%;
+    }
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 2rem;
+    background: transparent !important;
+    background-color: transparent !important;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    /* Remove any triangle or pseudo-element */
+}
+.hero::after, .hero::before, #welcome-message::after, #welcome-message::before {
+    content: none !important;
+    display: none !important;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* Service Booking Page Hero Section (Card Style) */
+.service-booking-hero {
+    background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);
+    color: #fff;
+    border-radius: 0 0 32px 32px;
+    box-shadow: 0 4px 24px rgba(0,123,255,0.08);
+    max-width: 700px;
+    margin: 0 auto 2.5rem auto;
+    padding: 2.5rem 2rem 2rem 2rem;
+    text-align: center;
+    position: relative;
+}
+.service-booking-hero .hero-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+.service-booking-hero .hero-title {
+    font-size: 2.7rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.service-booking-hero .hero-desc {
+    font-size: 1.25rem;
+    opacity: 0.95;
+}
+@media (max-width: 600px) {
+    .service-booking-hero {
+        padding: 1.5rem 0.5rem 1rem 0.5rem;
+    }
+    .service-booking-hero .hero-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* Services Section */
+.services {
+    padding: 2rem;
+    text-align: center;
+    background-color: #f9f9f9;
+}
+
+.services h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    justify-items: center;
+}
+
+.service-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 200px;
+    transition: border 0.3s ease;
+}
+
+.service-card img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.service-card h3 {
+    font-size: 1rem;
+    color: #333;
+    margin: 0;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #333;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+/* Search Bar Styling */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    width: 300px;
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    flex: 1;
+}
+
+.search-bar button {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    color: #007bff;
+}
+
+/* Autocomplete List Styling */
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    z-index: 1000;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.autocomplete-list.show {
+    display: block;
+}
+
+.autocomplete-item {
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #000;
+    background: #fff;
+}
+
+.autocomplete-item:hover {
+    background: #f0f0f0;
+}
+
+/* Contact Section */
+.contact {
+    background: rgba(255,255,255,0.97);
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.09);
+    padding: 2.5rem 1.5rem;
+    margin: 3rem auto 2rem auto;
+    max-width: 900px;
+    transition: box-shadow 0.2s;
+}
+.contact:hover {
+    box-shadow: 0 8px 40px rgba(0,0,0,0.13);
+}
+.contact h2 {
+    color: #1a237e;
+    margin-top: 0;
+    letter-spacing: 1px;
+}
+.contact .fas {
+    margin-right: 0.5rem;
+}
+#feedback-btn {
+    margin-top: 1.5rem;
+    padding: 0.7rem 2.2rem;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, #1976d2 0%, #00bcd4 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+#feedback-btn:hover {
+    background: linear-gradient(90deg, #1565c0 0%, #0097a7 100%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+}
+#feedback-modal {
+    display: none;
+    position: fixed;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    background: rgba(30,40,60,0.18);
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(2px);
+}
+#feedback-modal .modal-content, #feedback-modal > div {
+    background: #fff;
+    padding: 2.5rem 1.5rem;
+    max-width: 420px;
+    width: 95vw;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.13);
+    animation: fadeInUp 0.3s cubic-bezier(.4,2,.6,1) 1;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+#feedback-modal h3 {
+    color: #1976d2;
+    margin-top: 0;
+    letter-spacing: 0.5px;
+}
+#feedback-modal label {
+    font-weight: 500;
+    color: #222;
+}
+#feedback-modal input, #feedback-modal textarea {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 6px;
+    border: 1px solid #cfd8dc;
+    margin-top: 0.2rem;
+    margin-bottom: 1.1rem;
+    font-size: 1rem;
+    background: #f7fafc;
+    transition: border 0.2s;
+}
+#feedback-modal input:focus, #feedback-modal textarea:focus {
+    border: 1.5px solid #1976d2;
+    outline: none;
+}
+#feedback-modal button[type="submit"] {
+    padding: 0.7rem 2.2rem;
+    background: linear-gradient(90deg, #1976d2 0%, #00bcd4 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#feedback-modal button[type="submit"]:hover {
+    background: linear-gradient(90deg, #1565c0 0%, #0097a7 100%);
+}
+#feedback-success {
+    color: #388e3c;
+    margin-top: 1rem;
+    display: none;
+    font-weight: 500;
+    text-align: center;
+}
+#close-feedback-modal {
+    position: absolute;
+    top: 10px; right: 10px;
+    font-size: 1.3rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+}
+#close-feedback-modal:hover {
+    color: #1976d2;
+}
+
+/* --- Responsive Fixes for All Screens --- */
+@media (max-width: 1200px) {
+    .search-bar-container {
+        margin-left: 0 !important;
+    }
+    .services {
+        padding: 1.5rem 0.5rem;
+    }
+}
+@media (max-width: 900px) {
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.7rem 1rem;
+    }
+    .navbar ul {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .search-bar-container {
+        flex-direction: column;
+        margin: 0 !important;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    .service-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+    .service-card {
+        max-width: 100%;
+    }
+    #about-contact-section {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+    }
+}
+@media (max-width: 600px) {
+    .navbar {
+        padding: 0.5rem 0.3rem;
+    }
+    .logo-img {
+        height: 48px;
+    }
+    .search-bar-container {
+        flex-direction: column;
+        margin: 0 !important;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    .search-bar {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 0.3rem 0.5rem;
+    }
+    .location-search input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    .service-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .service-card {
+        max-width: 100%;
+        min-width: 0;
+        padding: 0.7rem;
+    }
+    #about-contact-section {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        margin: 0 auto 1rem auto !important;
+    }
+    #contact-card, #about-card {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: 1.2rem 0.7rem !important;
+    }
+}
+
+html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+}

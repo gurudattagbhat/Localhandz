@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Local Handz</title>
+    <link rel="stylesheet" href="../styles/main.css?v=1.1">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+        .login-form {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-form h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: #333;
+            text-align: center;
+        }
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #333;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .login-form button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .login-form button:hover {
+            background-color: #555;
+        }
+        .error-message {
+            color: red;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .admin-logo {
+            display: block;
+            margin: 0 auto 1.5rem auto;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <form class="login-form" id="admin-login-form" autocomplete="off">
+            <a href="../index.html" style="display:inline-block;margin-bottom:1rem;text-align:left;text-decoration:none;color:#007bff;font-weight:600;font-size:1rem;">← Home</a>
+            <img src="../images/Logomain.jpg" alt="Admin Logo" class="admin-logo">
+            <h2>Admin Login</h2>
+            <div id="error-message" class="error-message"></div>
+            <label for="admin-username">Username</label>
+            <input type="text" id="admin-username" name="username" placeholder="Enter admin username" required autofocus>
+            <label for="admin-password">Password</label>
+            <input type="password" id="admin-password" name="password" placeholder="Enter password" required>
+            <label for="admin-captcha">Captcha</label>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+                <img src="captcha.php" alt="Captcha" id="captcha-img" style="height: 38px; border-radius: 4px; border: 1px solid #ddd;">
+                <button type="button" id="refresh-captcha" style="padding: 0.5rem 1rem; font-size: 1rem;">↻</button>
+            </div>
+            <input type="text" id="admin-captcha" name="captcha" placeholder="Enter captcha" required autocomplete="off">
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('refresh-captcha').onclick = function() {
+            document.getElementById('captcha-img').src = 'captcha.php?' + Date.now();
+        };
+        document.getElementById('admin-login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const username = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value.trim();
+            const captcha = document.getElementById('admin-captcha').value.trim();
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = '';
+            if (!captcha) {
+                errorMessage.textContent = 'Please enter the captcha.';
+                return;
+            }
+            try {
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+                formData.append('captcha', captcha);
+                const response = await fetch('admin_login.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = 'admin_dashboard.html';
+                } else {
+                    errorMessage.textContent = data.message || 'Login failed.';
+                    document.getElementById('captcha-img').src = 'captcha.php?' + Date.now();
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Server error. Please try again.';
+                document.getElementById('captcha-img').src = 'captcha.php?' + Date.now();
+            }
+        });
+    </script>
+</body>
+</html>

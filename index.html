@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Handz Dashboard</title>
+    <link rel="stylesheet" href="styles/main.css?v=1.1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* General Layout */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Logo Styling */
+        .logo-img {
+            height: 70px;
+            background: transparent;
+            display: block;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .navbar ul li a:hover {
+            text-decoration: underline;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Search Bar Styling */
+        .search-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-grow: 1;
+            margin-left: 300px;
+        }
+
+        .location-search input,
+        .search-bar input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .search-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-bar .search-icon {
+            font-size: 1.5rem;
+            color: #333;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .autocomplete-list div {
+            padding: 0.5rem;
+            cursor: pointer;
+            color: #000;
+            background: #fff;
+        }
+
+        .autocomplete-list div:hover {
+            background: #f0f0f0;
+        }
+
+        /* Dropdown Menu Styling */
+        .profile-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            display: none; /* Hidden by default */
+            background-color: #444;
+            color: #fff;
+            list-style: none;
+            padding: 1rem;
+            margin: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            z-index: 1000;
+            min-width: 150px;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu li {
+            padding: 0.5rem 1rem;
+        }
+
+        .dropdown-menu li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .dropdown-menu li a:hover {
+            background-color: #666;
+            border-radius: 4px;
+        }
+
+        /* Add top margin to main content to prevent overlap */
+        main {
+            margin-top: 90px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <div class="search-bar-container">
+                <div class="location-search">
+                    <input type="text" id="location-input" placeholder="Fetching your location..." />
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon" id="search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search for services..." />
+                    <div id="autocomplete-list" class="autocomplete-list"></div>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#contact" id="contact-link">Contact</a></li>
+                    <li><a href="my_bookings.html">My Bookings</a></li>
+                </ul>
+                <a href="cart.html" class="cart-icon">
+                    🛒
+                    <span class="cart-count">0</span>
+                </a>
+                <div class="profile-icon" id="profile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li id="login-option"><a href="login.html">Login</a></li>
+                    <li><a href="register.html">Sign Up</a></li>
+                    <li><a href="register-service-provider.html">Register as Service Provider</a></li>
+                    <li><a href="profile.html" id="profile-link">Profile</a></li>
+                    <li><a href="admin/admin_login.html" id="admin-link">Admin</a></li>
+                    <li><a href="#" id="logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <section class="hero">
+            <h1 id="welcome-message">Welcome, Guest</h1>
+            <h2>Home services at your doorstep</h2>
+        </section>
+
+        <section id="services" class="services">
+            <h2>What are you looking for?</h2>
+            <div class="service-grid">
+                <div class="service-card" id="ac-repair" onclick="window.location.href='service_booking.html?service=ac-repair'">
+                    <img src="assets/ac-repair.jpg" alt="AC & Appliance Repair">
+                    <h3>AC & Appliance Repair</h3>
+                </div>
+                <div class="service-card" id="cleaning" onclick="window.location.href='service_booking.html?service=cleaning'">
+                    <img src="assets/cleaning.jpg" alt="Cleaning">
+                    <h3>Cleaning</h3>
+                </div>
+                <div class="service-card" id="electrician" onclick="window.location.href='service_booking.html?service=electrician'">
+                    <img src="assets/electrician.jpg" alt="Electrician">
+                    <h3>Electrician</h3>
+                </div>
+                <div class="service-card" id="plumber" onclick="window.location.href='service_booking.html?service=plumber'">
+                    <img src="assets/plumber.jpeg" alt="Plumber">
+                    <h3>Plumber</h3>
+                </div>
+                <div class="service-card" id="carpenter" onclick="window.location.href='service_booking.html?service=carpenter'">
+                    <img src="assets/carpenter.jpeg" alt="Carpenter">
+                    <h3>Carpenter</h3>
+                </div>
+                <div class="service-card" id="water-purifier" onclick="window.location.href='service_booking.html?service=water-purifier'">
+                    <img src="assets/water.jpeg" alt="Native Water Purifier">
+                    <h3>Native Water Purifier</h3>
+                </div>
+                <div class="service-card" id="painter" onclick="window.location.href='service_booking.html?service=painter'">
+                    <img src="assets/painter.jpeg" alt="Painting & Waterproofing">
+                    <h3>Painting & Waterproofing</h3>
+                </div>
+                <div class="service-card" id="wall-panels" onclick="window.location.href='service_booking.html?service=wall-panels'">
+                    <img src="assets/wall.jpeg" alt="Wall Panels">
+                    <h3>Wall Panels</h3>
+                </div>
+                <div class="service-card" id="gardening" onclick="window.location.href='service_booking.html?service=gardening'">
+                    <img src="assets/gardening.jpg" alt="Gardening Services">
+                    <h3>Gardening Services</h3>
+                </div>
+                <div class="service-card" id="home-security" onclick="window.location.href='service_booking.html?service=home-security'">
+                    <img src="assets/home-security.jpg" alt="Home Security">
+                    <h3>Home Security</h3>
+                </div>
+                <div class="service-card" id="pest-control" onclick="window.location.href='service_booking.html?service=pest-control'">
+                    <img src="assets/pest-control.jpg" alt="Pest Control">
+                    <h3>Pest Control</h3>
+                </div>
+                <div class="service-card" id="moving-services" onclick="window.location.href='service_booking.html?service=moving-services'">
+                    <img src="assets/moving-services.jpg" alt="Moving Services">
+                    <h3>Moving Services</h3>
+                </div>
+            </div>
+        </section>
+        <div style="height: 2.5rem;"></div>
+        <section id="about-contact-section" style="display:flex;flex-wrap:wrap;gap:2rem;justify-content:center;align-items:stretch;width:100%;margin:0 auto 2rem auto;overflow-x:hidden;">
+            <div id="contact-card" style="flex:1 1 400px;min-width:320px;max-width:600px;background:rgba(255,255,255,0.97);border-radius:18px;box-shadow:0 4px 32px rgba(0,0,0,0.09);padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:center;">
+                <h2 style="color:#2d3a4a;margin-top:0;">Contact Us</h2>
+                <div style="margin-bottom:1.2rem;"><i class="fas fa-envelope" style="color:#007bff;"></i> <b>Email:</b> <a href="mailto:your-contact@email.com" style="color:#007bff;">your-contact@email.com</a></div>
+                <!-- UPDATE: Replace 'your-contact@email.com' with your actual business email address -->
+                <div style="margin-bottom:1.2rem;"><i class="fas fa-phone" style="color:#28a745;"></i> <b>Phone:</b> <span style="color:#333;">+91-90000-00000</span></div>
+                <div style="margin-bottom:1.2rem;"><i class="fas fa-map-marker-alt" style="color:#dc3545;"></i> <b>Address:</b> <span style="color:#333;">Localhandz office, near bus stop, Yellapur, Uttara Kannada - 581359, Karnataka, India</span></div>
+                <div style="margin-bottom:1.2rem;"><i class="fas fa-clock" style="color:#ffc107;"></i> <b>Working Hours:</b> <span style="color:#333;">Mon-Sat: 9:00 AM - 7:00 PM</span></div>
+                <div style="margin-bottom:1.2rem;"><i class="fas fa-info-circle" style="color:#6c757d;"></i> <b>Support:</b> <span style="color:#333;">For urgent queries, call or email us. We respond within 24 hours.</span></div>
+                <button id="feedback-btn" style="margin-top:1.5rem;padding:0.7rem 2rem;font-size:1.1rem;background:#007bff;color:#fff;border:none;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.07);cursor:pointer;transition:background 0.2s;">Send Feedback</button>
+            </div>
+            <div id="about-card" style="flex:1 1 400px;min-width:320px;max-width:600px;background:#fff;border-radius:18px;box-shadow:0 4px 32px rgba(0,0,0,0.09);padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:center;">
+                <h2 style="color:#2d3a4a;margin-top:0;">About</h2>
+                <div id="about-basic">
+                    <p style="margin-bottom:0.8rem;">This project, <b>Local Handz</b>, is developed by <b>Gurudatta G Bhat</b> as a BCA VI Semester project (2024-25).</p>
+                    <button id="about-more-btn" style="margin-top:0.7rem;padding:0.5rem 1.2rem;font-size:1rem;background:#1976d2;color:#fff;border:none;border-radius:6px;cursor:pointer;">More</button>
+                </div>
+                <div id="about-full" style="display:none;">
+                    <p style="margin-bottom:0.8rem;">This project, <b>Local Handz</b>, is developed by <b>Gurudatta G Bhat</b> as a BCA VI Semester project (2024-25).</p>
+                    <ul style="padding-left:1.2rem;color:#444;">
+                        <li>Purpose: To connect users with local service providers for home services.</li>
+                        <li>Features: Service booking, provider management, reviews, admin dashboard, and more.</li>
+                        <li>Technologies: PHP, MySQL, HTML5, CSS3, JavaScript, FontAwesome, and more.</li>
+                        <li>Institution: J S S Shri Manjunatheshwara Institute Of UG. & PG. Studies Vidyagiri Dharwad 580004</li>
+                        <li>Academic Year: 2024-25</li>
+                    </ul>
+                    <p style="margin-top:1.2rem;color:#888;font-size:0.95rem;">All rights reserved &copy; 2025 Gurudatta G Bhat</p>
+                    <button id="about-less-btn" style="margin-top:0.7rem;padding:0.5rem 1.2rem;font-size:1rem;background:#1976d2;color:#fff;border:none;border-radius:6px;cursor:pointer;">Less</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feedback Modal -->
+        <div id="feedback-modal" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+            <div style="background:#fff;padding:2.5rem 1.5rem;max-width:420px;width:95vw;border-radius:14px;position:relative;box-shadow:0 4px 24px rgba(0,0,0,0.13);">
+                <button id="close-feedback-modal" style="position:absolute;top:10px;right:10px;font-size:1.3rem;background:none;border:none;cursor:pointer;color:#888;">&times;</button>
+                <h3 style="margin-top:0;color:#007bff;">Send Feedback</h3>
+                <form id="feedback-form">
+                    <div style="margin-bottom:1.1rem;">
+                        <label for="feedback-name" style="font-weight:500;">Name</label><br>
+                        <input type="text" id="feedback-name" name="name" style="width:100%;padding:0.6rem;border-radius:5px;border:1px solid #ccc;" required>
+                    </div>
+                    <div style="margin-bottom:1.1rem;">
+                        <label for="feedback-email" style="font-weight:500;">Email</label><br>
+                        <input type="email" id="feedback-email" name="email" style="width:100%;padding:0.6rem;border-radius:5px;border:1px solid #ccc;" required>
+                    </div>
+                    <div style="margin-bottom:1.1rem;">
+                        <label for="feedback-message" style="font-weight:500;">Message</label><br>
+                        <textarea id="feedback-message" name="message" rows="4" style="width:100%;padding:0.6rem;border-radius:5px;border:1px solid #ccc;resize:vertical;" required></textarea>
+                    </div>
+                    <button type="submit" style="padding:0.6rem 2rem;background:#007bff;color:#fff;border:none;border-radius:6px;font-size:1.05rem;">Submit</button>
+                    <div id="feedback-success" style="color:green;margin-top:1rem;display:none;">Thank you for your feedback!</div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            checkLoginStatus();
+            fetchLocation();
+            updateCartCount();
+
+            // Dropdown toggle functionality
+            const profileIcon = document.getElementById('profile-icon');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+
+            profileIcon.addEventListener('click', function () {
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Close the dropdown if clicked outside
+            document.addEventListener('click', function (event) {
+                if (!profileIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Logout functionality
+            const logoutButton = document.getElementById('logout');
+            logoutButton.addEventListener('click', async function (e) {
+                e.preventDefault();
+                try {
+                    const response = await fetch('logout.php');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            console.error('Logout failed');
+                        }
+                    } else {
+                        console.error('Logout request failed with status:', response.status);
+                    }
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                }
+            });
+
+            // Cart functionality
+            async function updateCartCount() {
+                try {
+                    const response = await fetch('cart_api.php?action=fetch');
+                    const data = await response.json();
+                    const cartCount = document.querySelector('.cart-count');
+                    cartCount.textContent = data.success ? data.cart.length : 0;
+                } catch (err) {
+                    const cartCount = document.querySelector('.cart-count');
+                    cartCount.textContent = 0;
+                }
+            }
+
+            // Add to cart functionality
+            async function addToCart(serviceObj) {
+                try {
+                    const response = await fetch('cart_api.php?action=add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(serviceObj)
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        updateCartCount();
+                        let toast = document.createElement('div');
+                        toast.textContent = 'Added to cart!';
+                        toast.style.position = 'fixed';
+                        toast.style.bottom = '30px';
+                        toast.style.left = '50%';
+                        toast.style.transform = 'translateX(-50%)';
+                        toast.style.background = '#28a745';
+                        toast.style.color = '#fff';
+                        toast.style.padding = '1rem 2rem';
+                        toast.style.borderRadius = '8px';
+                        toast.style.zIndex = 9999;
+                        document.body.appendChild(toast);
+                        setTimeout(() => { toast.remove(); }, 1500);
+                    } else {
+                        alert(data.error || 'Failed to add to cart');
+                    }
+                } catch (err) {
+                    alert('Failed to add to cart.');
+                }
+            }
+
+            // Search bar functionality
+            const searchInput = document.getElementById('search-input');
+            const autocompleteList = document.getElementById('autocomplete-list');
+
+            const services = [
+                { id: 'ac-repair', name: 'AC & Appliance Repair' },
+                { id: 'cleaning', name: 'Cleaning' },
+                { id: 'electrician', name: 'Electrician' },
+                { id: 'plumber', name: 'Plumber' },
+                { id: 'carpenter', name: 'Carpenter' },
+                { id: 'water-purifier', name: 'Native Water Purifier' },
+                { id: 'painter', name: 'Painting & Waterproofing' },
+                { id: 'wall-panels', name: 'Wall Panels' },
+                { id: 'gardening', name: 'Gardening Services' },
+                { id: 'home-security', name: 'Home Security' },
+                { id: 'pest-control', name: 'Pest Control' },
+                { id: 'moving-services', name: 'Moving Services' }
+            ];
+
+            searchInput.addEventListener('input', function () {
+                const query = searchInput.value.toLowerCase();
+                autocompleteList.innerHTML = '';
+
+                if (query) {
+                    const filteredServices = services.filter(service =>
+                        service.name.toLowerCase().includes(query)
+                    );
+
+                    filteredServices.forEach(service => {
+                        const suggestion = document.createElement('div');
+                        suggestion.textContent = service.name;
+                        suggestion.dataset.id = service.id;
+                        suggestion.classList.add('autocomplete-item');
+
+                        suggestion.addEventListener('click', function () {
+                            navigateToService(service.id);
+                        });
+
+                        autocompleteList.appendChild(suggestion);
+                    });
+
+                    autocompleteList.style.display = 'block';
+                } else {
+                    autocompleteList.style.display = 'none';
+                }
+            });
+
+            searchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const firstSuggestion = autocompleteList.querySelector('.autocomplete-item');
+                    if (firstSuggestion) {
+                        navigateToService(firstSuggestion.dataset.id);
+                    }
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!searchInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+                    autocompleteList.style.display = 'none';
+                }
+            });
+
+            function navigateToService(serviceId) {
+                window.location.href = `service_booking.html?service=${serviceId}`;
+            }
+
+            function selectProvider(provider) {
+                // Show booking details section
+                const bookingDetails = document.getElementById('booking-details');
+                bookingDetails.style.display = 'block';
+                // Set provider name
+                document.getElementById('booking-provider-name').textContent = `Book with ${provider.name}`;
+                // Optionally, store provider info for booking submission
+                bookingDetails.dataset.providerId = provider.id;
+                bookingDetails.dataset.serviceId = provider.service_id;
+            }
+
+            // Handle booking form submission
+            document.addEventListener('DOMContentLoaded', function() {
+                const bookingForm = document.getElementById('booking-form');
+                if (bookingForm) {
+                    bookingForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        // You can send booking data to backend here
+                        document.getElementById('booking-success').style.display = 'block';
+                        setTimeout(() => {
+                            document.getElementById('booking-success').style.display = 'none';
+                            document.getElementById('booking-details').style.display = 'none';
+                        }, 2000);
+                        bookingForm.reset();
+                    });
+                }
+            });
+
+            // Feedback modal logic
+            const feedbackBtn = document.getElementById('feedback-btn');
+            const feedbackModal = document.getElementById('feedback-modal');
+            const closeFeedbackModal = document.getElementById('close-feedback-modal');
+            const feedbackForm = document.getElementById('feedback-form');
+            const feedbackSuccess = document.getElementById('feedback-success');
+            feedbackBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'flex';
+            });
+            closeFeedbackModal.addEventListener('click', function() {
+                feedbackModal.style.display = 'none';
+            });
+            feedbackModal.addEventListener('click', function(e) {
+                if (e.target === feedbackModal) feedbackModal.style.display = 'none';
+            });
+            feedbackForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                feedbackSuccess.style.display = 'none';
+                const formData = new FormData(feedbackForm);
+                const res = await fetch('submit_feedback.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    feedbackSuccess.style.display = 'block';
+                    feedbackForm.reset();
+                    setTimeout(() => { feedbackModal.style.display = 'none'; feedbackSuccess.style.display = 'none'; }, 2000);
+                } else {
+                    feedbackSuccess.style.display = 'block';
+                    feedbackSuccess.style.color = 'red';
+                    feedbackSuccess.textContent = data.message || 'Failed to send feedback.';
+                }
+            });
+
+            // About section more/less toggle
+            const aboutMoreBtn = document.getElementById('about-more-btn');
+            const aboutLessBtn = document.getElementById('about-less-btn');
+            const aboutBasic = document.getElementById('about-basic');
+            const aboutFull = document.getElementById('about-full');
+            if (aboutMoreBtn && aboutFull && aboutBasic) {
+                aboutMoreBtn.onclick = function() {
+                    aboutBasic.style.display = 'none';
+                    aboutFull.style.display = 'block';
+                };
+            }
+            if (aboutLessBtn && aboutFull && aboutBasic) {
+                aboutLessBtn.onclick = function() {
+                    aboutFull.style.display = 'none';
+                    aboutBasic.style.display = 'block';
+                };
+            }
+
+            // Smooth scroll for Contact link to About & Contact section
+            const contactLink = document.getElementById('contact-link');
+            if (contactLink) {
+                contactLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const aboutContactSection = document.getElementById('about-contact-section');
+                    if (aboutContactSection) {
+                        aboutContactSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            }
+        });
+
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('backend.php?action=getUserDetails');
+                const data = await response.json();
+
+                const welcomeMessage = document.getElementById('welcome-message');
+                const loginOption = document.getElementById('login-option');
+                const logoutOption = document.getElementById('logout');
+
+                if (data.loggedIn && data.user && data.user.name) {
+                    // Update the welcome message
+                    welcomeMessage.textContent = `Welcome, ${data.user.name}`;
+
+                    // Hide login and sign-up options
+                    if (loginOption) loginOption.style.display = 'none';
+
+                    // Show logout option
+                    if (logoutOption) logoutOption.style.display = 'block';
+                } else {
+                    // Default to Guest
+                    welcomeMessage.innerHTML = 'Welcome, Guest <button id="inline-login-btn" style="margin-left:10px;padding:2px 10px;font-size:1rem;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;">Login</button>';
+
+                    // Show login and sign-up options
+                    if (loginOption) loginOption.style.display = 'block';
+
+                    // Hide logout option
+                    if (logoutOption) logoutOption.style.display = 'none';
+
+                    // Add click event for inline login button
+                    const inlineLoginBtn = document.getElementById('inline-login-btn');
+                    if (inlineLoginBtn) {
+                        inlineLoginBtn.onclick = function() {
+                            window.location.href = 'login.html';
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                document.getElementById('welcome-message').textContent = 'Welcome, Guest';
+            }
+        }
+
+        async function fetchLocation() {
+            const locationInput = document.getElementById('location-input');
+
+            if (!navigator.geolocation) {
+                locationInput.value = 'Geolocation is not supported by your browser.';
+                return;
+            }
+
+            locationInput.value = 'Fetching your location...';
+
+            navigator.geolocation.getCurrentPosition(
+                async function (position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    // Use a reverse geocoding API to fetch the location name
+                    try {
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                        );
+                        const data = await response.json();
+
+                        if (data && data.display_name) {
+                            locationInput.value = data.display_name;
+                        } else {
+                            locationInput.value = 'Unable to fetch location name.';
+                        }
+                    } catch (error) {
+                        console.error('Error fetching location name:', error);
+                        locationInput.value = 'Error fetching location.';
+                    }
+                },
+                function (error) {
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            locationInput.value = 'Permission denied. Please allow location access.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            locationInput.value = 'Location information is unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            locationInput.value = 'The request to get user location timed out.';
+                            break;
+                        default:
+                            locationInput.value = 'An unknown error occurred.';
+                            break;
+                    }
+                }
+            );
+        }
+    </script>
+</body>
+</html>

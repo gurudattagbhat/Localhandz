@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <div class="navbar-right">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <a href="cart.html" class="cart-icon">
+                    🛒
+                    <span class="cart-count">0</span>
+                </a>
+                <div class="profile-icon" id="profile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li id="login-option"><a href="login.html">Login</a></li>
+                    <li><a href="register.html">Sign Up</a></li>
+                    <li><a href="register-service-provider.html">Register as Service Provider</a></li>
+                    <li><a href="#" id="logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="checkout-container">
+        <h1>Checkout</h1>
+        <div class="checkout-grid">
+            <div class="checkout-form">
+                <h2>Billing Information</h2>
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" id="state" name="state" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="zip">ZIP Code</label>
+                        <input type="text" id="zip" name="zip" required>
+                    </div>
+
+                    <h2>Payment Information</h2>
+                    <div class="form-group">
+                        <label for="card-number">Card Number</label>
+                        <input type="text" id="card-number" name="card-number" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expiry">Expiry Date</label>
+                            <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" name="cvv" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="order-summary">
+                <h2>Order Summary</h2>
+                <div class="order-items" id="order-items">
+                    <!-- Order items will be dynamically added here -->
+                </div>
+                <div class="order-totals">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="order-subtotal">₹0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Service Fee</span>
+                        <span id="order-service-fee">₹0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="order-total">₹0</span>
+                    </div>
+                </div>
+                <button id="place-order-btn" class="checkout-btn">Place Order</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Get cart data from localStorage
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const orderItemsContainer = document.getElementById('order-items');
+        const orderSubtotalElement = document.getElementById('order-subtotal');
+        const orderServiceFeeElement = document.getElementById('order-service-fee');
+        const orderTotalElement = document.getElementById('order-total');
+        const placeOrderBtn = document.getElementById('place-order-btn');
+        const checkoutForm = document.getElementById('checkout-form');
+
+        function renderOrderItems() {
+            orderItemsContainer.innerHTML = '';
+            
+            cart.forEach(item => {
+                const orderItem = document.createElement('div');
+                orderItem.className = 'order-item';
+                orderItem.innerHTML = `
+                    <div class="item-details">
+                        <h3>${item.name}</h3>
+                        <p class="item-quantity">Quantity: ${item.quantity}</p>
+                    </div>
+                    <p class="item-price">₹${(item.price * item.quantity).toFixed(2)}</p>
+                `;
+                orderItemsContainer.appendChild(orderItem);
+            });
+        }
+
+        function calculateOrderTotals() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const serviceFee = subtotal * 0.1; // 10% service fee
+            const total = subtotal + serviceFee;
+
+            orderSubtotalElement.textContent = `₹${subtotal.toFixed(2)}`;
+            orderServiceFeeElement.textContent = `₹${serviceFee.toFixed(2)}`;
+            orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+        }
+
+        // Initialize order display
+        renderOrderItems();
+        calculateOrderTotals();
+
+        // Place order button click handler
+        placeOrderBtn.addEventListener('click', async () => {
+            if (!checkoutForm.checkValidity()) {
+                checkoutForm.reportValidity();
+                return;
+            }
+
+            try {
+                // Collect form data
+                const formData = new FormData(checkoutForm);
+                const orderData = {
+                    customer: Object.fromEntries(formData),
+                    items: cart,
+                    total: parseFloat(orderTotalElement.textContent.replace('₹', '')),
+                    status: 'pending'
+                };
+
+                // Send order to server
+                const response = await fetch('process_order.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (response.ok) {
+                    // Clear cart
+                    localStorage.removeItem('cart');
+                    // Redirect to success page
+                    window.location.href = 'order_success.html';
+                } else {
+                    throw new Error('Failed to process order');
+                }
+            } catch (error) {
+                console.error('Error placing order:', error);
+                alert('Failed to place order. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html> 

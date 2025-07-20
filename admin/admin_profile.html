@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Admin Profile</title>
+    <link href="css/admin.css" rel="stylesheet">
+</head>
+<body>
+    <div class="main-content" style="max-width:400px;margin:40px auto;background:#fff;padding:32px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h2>Edit Profile</h2>
+        <form id="edit-profile-form">
+            <label for="edit-admin-username">Username</label>
+            <input type="text" id="edit-admin-username" name="username" required style="width:100%;margin-bottom:12px;">
+            <label for="edit-admin-password">New Password</label>
+            <input type="password" id="edit-admin-password" name="password" placeholder="Leave blank to keep current password" style="width:100%;margin-bottom:16px;">
+            <button type="submit" style="width:100%;background:#007bff;color:#fff;border:none;padding:10px;border-radius:6px;font-size:1rem;cursor:pointer;">Save</button>
+            <div id="edit-profile-msg" style="margin-top:10px;font-size:0.95rem;"></div>
+        </form>
+        <a href="admin_dashboard.html" style="display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;">&larr; Back to Dashboard</a>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editProfileForm = document.getElementById('edit-profile-form');
+        const editProfileMsg = document.getElementById('edit-profile-msg');
+        const editAdminUsername = document.getElementById('edit-admin-username');
+        const editAdminPassword = document.getElementById('edit-admin-password');
+
+        // Fetch current profile
+        fetch('admin_api.php?action=get_admin_profile')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.profile) {
+                    editAdminUsername.value = data.profile.username;
+                } else {
+                    editProfileMsg.style.color = 'red';
+                    editProfileMsg.textContent = data.message || 'Could not load profile.';
+                }
+            });
+
+        editProfileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            editProfileMsg.textContent = 'Saving...';
+            editProfileMsg.style.color = '';
+            const formData = new FormData(editProfileForm);
+            fetch('admin_api.php?action=update_admin_profile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    editProfileMsg.style.color = 'green';
+                    editProfileMsg.textContent = 'Profile updated!';
+                    setTimeout(() => {
+                        window.location.href = 'admin_dashboard.html';
+                    }, 1000);
+                } else {
+                    editProfileMsg.style.color = 'red';
+                    editProfileMsg.textContent = data.message || 'Update failed.';
+                }
+            })
+            .catch(() => {
+                editProfileMsg.style.color = 'red';
+                editProfileMsg.textContent = 'Network error.';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

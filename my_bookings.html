@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { background: #f6f8fb; font-family: Arial, sans-serif; }
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #333;
+            color: #fff;
+        }
+        .navbar-right { display: flex; align-items: center; justify-content: flex-end; gap: 1.5rem; margin-left: auto; }
+        .bookings-container { max-width: 900px; margin: 2rem auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.07); padding: 2rem; }
+        .filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; margin-top: 100px; /* Ensure filters are always below the navbar */ }
+        .filters button { background: #e9f0fa; color: #007bff; border: none; border-radius: 5px; padding: 0.5rem 1.2rem; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+        .filters button.active, .filters button:hover { background: #007bff; color: #fff; }
+        .bookings-list { width: 100%; border-collapse: collapse; }
+        .bookings-list th, .bookings-list td { padding: 1rem; border-bottom: 1px solid #f0f4fa; text-align: left; }
+        .bookings-list th { background: #f6f8fb; color: #333; font-weight: 600; }
+        .status-badge { padding: 0.4em 1em; border-radius: 16px; font-size: 0.95em; font-weight: 600; display: inline-block; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-accepted { background: #d1e7dd; color: #0f5132; }
+        .status-completed { background: #cce5ff; color: #004085; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .action-btn { background: #f0f4fa; color: #007bff; border: none; border-radius: 5px; padding: 0.4rem 1rem; font-size: 1rem; cursor: pointer; margin-right: 0.5rem; transition: background 0.2s; }
+        .action-btn:hover { background: #007bff; color: #fff; }
+        .delete-btn { background: #f8d7da; color: #dc3545; }
+        .delete-btn:hover { background: #dc3545; color: #fff; }
+        .spinner { display: flex; justify-content: center; align-items: center; height: 120px; }
+        .spinner i { font-size: 2.5rem; color: #007bff; }
+        .no-bookings { text-align: center; color: #888; font-size: 1.2rem; margin: 2rem 0; }
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.25); justify-content: center; align-items: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: #fff; border-radius: 10px; padding: 2rem; min-width: 320px; max-width: 95vw; box-shadow: 0 4px 24px rgba(0,0,0,0.13); }
+        .modal-content h2 { margin-top: 0; color: #007bff; }
+        .modal-content label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: 500; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 0.7rem; border: 1px solid #ced4da; border-radius: 6px; margin-bottom: 1rem; font-size: 1rem; }
+        .modal-content .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; }
+        .modal-content .modal-actions button { padding: 0.5rem 1.2rem; border-radius: 5px; border: none; font-size: 1rem; cursor: pointer; }
+        .modal-content .modal-actions .save-btn { background: #007bff; color: #fff; }
+        .modal-content .modal-actions .cancel-btn { background: #f0f4fa; color: #007bff; }
+        @media (max-width: 700px) { .bookings-container { padding: 0.5rem; } .bookings-list th, .bookings-list td { padding: 0.5rem; font-size: 0.95rem; } }
+        main { margin-top: 150px; }
+        /* Add extra margin to filters section to prevent overlap with navbar */
+        .filters-section, .filters-container, .filters-bar {
+            margin-top: 40px !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (copied from index.html) -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <div class="navbar-right">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+                <div class="profile-icon" id="profile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li id="login-option"><a href="login.html">Login</a></li>
+                    <li><a href="register.html">Sign Up</a></li>
+                    <li><a href="register-service-provider.html">Register as Service Provider</a></li>
+                    <li><a href="#" id="logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div class="bookings-container">
+        <div class="filters" id="filters">
+            <button data-status="all" class="active">All</button>
+            <button data-status="pending">Pending</button>
+            <button data-status="accepted">Accepted</button>
+            <button data-status="completed">Completed</button>
+            <button data-status="cancelled">Cancelled</button>
+        </div>
+        <div id="bookings-content">
+            <div class="spinner" id="loading-spinner"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+    </div>
+    <!-- Edit Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <h2>Edit Booking</h2>
+            <form id="edit-booking-form">
+                <label for="edit-address">Service Address</label>
+                <textarea id="edit-address" name="edit-address" required></textarea>
+                <label for="edit-date">Service Date</label>
+                <input type="date" id="edit-date" name="edit-date" required>
+                <label for="edit-time">Service Time</label>
+                <select id="edit-time" name="edit-time" required>
+                    <option value="">Select a time slot</option>
+                    <option value="09:00">09:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="13:00">01:00 PM</option>
+                    <option value="14:00">02:00 PM</option>
+                    <option value="15:00">03:00 PM</option>
+                    <option value="16:00">04:00 PM</option>
+                    <option value="17:00">05:00 PM</option>
+                    <option value="18:00">06:00 PM</option>
+                    <option value="19:00">07:00 PM</option>
+                    <option value="20:00">08:00 PM</option>
+                    <option value="21:00">09:00 PM</option>
+                    <option value="22:00">10:00 PM</option>
+                </select>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancel-edit">Cancel</button>
+                    <button type="submit" class="save-btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Provider Details Modal -->
+    <div class="modal" id="provider-modal">
+        <div class="modal-content" style="max-width:400px;text-align:center;position:relative;">
+            <button id="close-provider-modal-btn" style="position:absolute;top:10px;right:18px;font-size:1.5rem;background:none;border:none;cursor:pointer;color:#888;">&times;</button>
+            <img id="provider-photo" src="" alt="Provider Photo" style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:1rem;">
+            <h2 id="provider-name" style="margin:0 0 0.5rem 0;"></h2>
+            <div id="provider-email" style="margin-bottom:0.5rem;"></div>
+            <div id="provider-phone" style="margin-bottom:0.5rem;"></div>
+            <div id="provider-other"></div>
+        </div>
+    </div>
+    <!-- Review Modal -->
+    <div class="modal" id="review-modal">
+        <div class="modal-content" style="max-width:400px;">
+            <h2 style="color:#007bff;margin-top:0;">Leave a Review</h2>
+            <form id="review-form" style="display:flex;flex-direction:column;gap:0.7rem;">
+                <input type="hidden" id="review-provider-id">
+                <input type="hidden" id="review-service-id">
+                <input type="hidden" id="review-booking-id">
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="font-weight:500;">Your Name:</span>
+                    <input type="text" id="reviewer-name-modal" placeholder="Your Name" required style="flex:1;padding:0.5rem 1rem;border-radius:8px;border:1px solid #ced4da;font-size:1rem;" readonly>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="font-weight:500;">Your Rating:</span>
+                    <div id="star-rating-input-modal" style="display:flex;gap:0.2rem;font-size:1.3rem;cursor:pointer;"></div>
+                </div>
+                <textarea id="review-comment-modal" rows="2" placeholder="Write your review..." style="padding:0.8rem 1rem;border-radius:8px;border:1px solid #ced4da;font-size:1rem;"></textarea>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancel-review">Cancel</button>
+                    <button type="submit" class="save-btn">Submit Review</button>
+                </div>
+                <div id="review-success-modal" style="color:#28a745;font-weight:600;display:none;">Thank you for your review!</div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script>
+    // Update all fetch calls to use my_bookings_api.php with action param
+    let bookings = [];
+    let currentEditId = null;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        try {
+            const loginRes = await fetch('check_session.php');
+            const loginData = await loginRes.json();
+            if (!loginData.loggedIn) {
+                alert('You must be logged in to view your bookings. Redirecting to login page.');
+                window.location.href = 'login.html';
+                return;
+            }
+        } catch (err) {
+            alert('Unable to check login status. Please try again.');
+            window.location.href = 'login.html';
+            return;
+        }
+        fetchBookings();
+        setupFilters();
+        setupEditModal();
+        // Profile dropdown toggle logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const profileIcon = document.getElementById('profile-icon');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            profileIcon.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+            document.addEventListener('click', function (e) {
+                if (!profileIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+        });
+    });
+
+    function fetchBookings() {
+        showLoading(true);
+        fetch('my_bookings_api.php?action=fetch')
+            .then(res => res.json())
+            .then(data => {
+                bookings = data.success ? data.bookings : [];
+                renderBookings('all');
+                showLoading(false);
+            })
+            .catch(() => {
+                showLoading(false);
+                document.getElementById('bookings-content').innerHTML = '<div class="no-bookings">Failed to load bookings.</div>';
+            });
+    }
+
+    function renderBookings(status) {
+        let filtered = (status === 'all') ? bookings : bookings.filter(b => b.status === status);
+        const content = document.getElementById('bookings-content');
+        if (!filtered.length) {
+            content.innerHTML = '<div class="no-bookings">No bookings found.</div>';
+            return;
+        }
+        let html = `<table class="bookings-list">
+            <thead><tr>
+                <th>Photo</th>
+                <th>Service</th>
+                <th>Provider</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th>Requested</th>
+                <th>Actions</th>
+            </tr></thead><tbody>`;
+        filtered.forEach(b => {
+            html += `<tr class="booking-row" data-provider-id="${b.provider_id}" data-service-id="${b.service_id}" style="cursor:pointer;">
+                <td><img src="${b.service_photo ? b.service_photo : 'images/default-provider.jpg'}" alt="Service Photo" style="width:48px;height:48px;object-fit:cover;border-radius:8px;"></td>
+                <td>${b.service_name || '-'}</td>
+                <td>${b.provider_name || '-'}</td>
+                <td>${b.customer_address}</td>
+                <td><span class="status-badge status-${b.status}">${capitalize(b.status)}</span></td>
+                <td>${formatDate(b.request_date)}</td>
+                <td>
+                    <button class="action-btn" onclick="openEditModal(${b.id}, '${escapeQuotes(b.customer_address)}');event.stopPropagation();"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="action-btn delete-btn" onclick="deleteBooking(${b.id});event.stopPropagation();"><i class="fas fa-trash"></i> Delete</button>
+                    <button class="action-btn" onclick="viewProviderDetails(${b.provider_id});event.stopPropagation();"><i class="fas fa-user"></i> View Provider Details</button>`;
+            // Add Give Review button for completed bookings that are not yet reviewed
+            if (b.status === 'completed' && !b.reviewed) {
+                html += `<button class="action-btn" onclick="openReviewModal(${b.id});event.stopPropagation();"><i class="fas fa-star"></i> Give Review</button>`;
+            } else if (b.status === 'completed' && b.reviewed) {
+                html += `<span style="color:#28a745;font-weight:600;margin-left:0.5rem;">Reviewed</span>`;
+            }
+            html += `</td>\n            </tr>`;
+        });
+        html += '</tbody></table>';
+        content.innerHTML = html;
+        // Add row click listeners to go to provider details
+        document.querySelectorAll('.booking-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Only trigger if not clicking a button
+                if (e.target.tagName === 'TD' || e.target === row) {
+                    const providerId = row.getAttribute('data-provider-id');
+                    const serviceId = row.getAttribute('data-service-id');
+                    if (providerId && serviceId) {
+                        window.location.href = `provider_details.html?provider_id=${providerId}&service_id=${serviceId}`;
+                    }
+                }
+            });
+        });
+    }
+
+    function setupFilters() {
+        document.querySelectorAll('#filters button').forEach(btn => {
+            btn.onclick = function() {
+                document.querySelectorAll('#filters button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderBookings(this.dataset.status);
+            };
+        });
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading-spinner').style.display = show ? 'flex' : 'none';
+    }
+
+    function openEditModal(id, address) {
+        const booking = bookings.find(b => b.id === id);
+        currentEditId = id;
+        document.getElementById('edit-address').value = booking.customer_address;
+        // Parse date and time from request_date
+        const dt = new Date(booking.request_date);
+        document.getElementById('edit-date').value = dt.toISOString().slice(0,10);
+        document.getElementById('edit-time').value = dt.toTimeString().slice(0,5);
+        document.getElementById('edit-modal').classList.add('show');
+    }
+
+    function setupEditModal() {
+        document.getElementById('cancel-edit').onclick = function() {
+            document.getElementById('edit-modal').classList.remove('show');
+        };
+        document.getElementById('edit-booking-form').onsubmit = function(e) {
+            e.preventDefault();
+            const newAddress = document.getElementById('edit-address').value.trim();
+            const newDate = document.getElementById('edit-date').value;
+            const newTime = document.getElementById('edit-time').value;
+            if (!newAddress || !newDate || !newTime) return;
+            // Combine date and time into a single datetime string
+            const request_date = `${newDate} ${newTime}:00`;
+            fetch('my_bookings_api.php?action=update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentEditId, customer_address: newAddress, request_date })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    bookings = bookings.map(b => b.id === currentEditId ? { ...b, customer_address: newAddress, request_date } : b);
+                    renderBookings(document.querySelector('#filters .active').dataset.status);
+                    document.getElementById('edit-modal').classList.remove('show');
+                } else {
+                    alert(data.error || 'Failed to update booking.');
+                }
+            });
+        };
+    }
+
+    function deleteBooking(id) {
+        if (!confirm('Are you sure you want to delete this booking?')) return;
+        fetch('my_bookings_api.php?action=delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                bookings = bookings.filter(b => b.id !== id);
+                renderBookings(document.querySelector('#filters .active').dataset.status);
+            } else {
+                alert(data.error || 'Failed to delete booking.');
+            }
+        });
+    }
+
+    function viewProviderDetails(providerId) {
+        fetch(`get_basic_provider_details.php?provider_id=${providerId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.provider) {
+                    document.getElementById('provider-photo').src = data.provider.photo || 'images/default-provider.jpg';
+                    document.getElementById('provider-name').textContent = data.provider.name || '-';
+                    document.getElementById('provider-email').innerHTML = `<b>Email:</b> ${data.provider.email || '-'}`;
+                    document.getElementById('provider-phone').innerHTML = `<b>Phone:</b> ${data.provider.phone || '-'}`;
+                    document.getElementById('provider-other').innerHTML = '';
+                    document.getElementById('provider-modal').classList.add('show');
+                } else {
+                    alert('Provider details not found.');
+                }
+            })
+            .catch(() => alert('Failed to fetch provider details.'));
+    }
+
+    const closeBtn = document.getElementById('close-provider-modal-btn');
+    closeBtn.onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('provider-modal').classList.remove('show');
+    };
+    document.getElementById('provider-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('show');
+        }
+    });
+
+    // --- Review Modal Logic ---
+    let currentReviewBooking = null;
+
+    window.openReviewModal = function(bookingId) {
+        const booking = bookings.find(b => b.id === bookingId);
+        if (!booking) return;
+        currentReviewBooking = booking;
+        document.getElementById('review-provider-id').value = booking.provider_id;
+        document.getElementById('review-service-id').value = booking.service_id;
+        document.getElementById('review-booking-id').value = booking.id;
+        document.getElementById('review-comment-modal').value = '';
+        // Autofill reviewer name
+        autofillReviewerNameModal();
+        // Reset star rating
+        renderStarRatingInputModal();
+        document.getElementById('review-success-modal').style.display = 'none';
+        document.getElementById('review-modal').classList.add('show');
+    };
+
+    document.getElementById('cancel-review').onclick = function() {
+        document.getElementById('review-modal').classList.remove('show');
+    };
+    document.getElementById('review-modal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('show');
+    });
+
+    // Star rating input logic (modal)
+    function renderStarRatingInputModal() {
+        const starInput = document.getElementById('star-rating-input-modal');
+        let currentRating = 0;
+        starInput.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            const star = document.createElement('span');
+            star.innerHTML = '☆';
+            star.style.color = '#ccc';
+            star.style.fontSize = '1.3rem';
+            star.style.cursor = 'pointer';
+            star.onclick = () => {
+                currentRating = i;
+                updateStars(currentRating);
+            };
+            starInput.appendChild(star);
+        }
+        function updateStars(rating) {
+            Array.from(starInput.children).forEach((star, idx) => {
+                star.innerHTML = idx < rating ? '★' : '☆';
+                star.style.color = idx < rating ? '#ffc107' : '#ccc';
+            });
+        }
+        // Store rating on form for submit
+        document.getElementById('review-form').dataset.rating = 0;
+        starInput.onclick = function(e) {
+            if (e.target.tagName === 'SPAN') {
+                const idx = Array.from(starInput.children).indexOf(e.target);
+                document.getElementById('review-form').dataset.rating = idx + 1;
+            }
+        };
+    }
+
+    // Autofill reviewer name (modal)
+    async function autofillReviewerNameModal() {
+        try {
+            const response = await fetch('check_session.php');
+            const data = await response.json();
+            if (data.loggedIn && data.user && data.user.name) {
+                document.getElementById('reviewer-name-modal').value = data.user.name;
+                document.getElementById('reviewer-name-modal').readOnly = true;
+            } else {
+                document.getElementById('reviewer-name-modal').value = '';
+                document.getElementById('reviewer-name-modal').readOnly = false;
+            }
+        } catch (e) {
+            document.getElementById('reviewer-name-modal').value = '';
+            document.getElementById('reviewer-name-modal').readOnly = false;
+        }
+    }
+
+    // Review form submit
+    document.getElementById('review-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const provider_id = document.getElementById('review-provider-id').value;
+        const service_id = document.getElementById('review-service-id').value;
+        const reviewer_name = document.getElementById('reviewer-name-modal').value.trim();
+        const rating = parseInt(this.dataset.rating || '0', 10);
+        const comment = document.getElementById('review-comment-modal').value.trim();
+        if (!reviewer_name) {
+            alert('Please enter your name.');
+            return;
+        }
+        if (!rating) {
+            alert('Please select a rating.');
+            return;
+        }
+        // POST review
+        const res = await fetch('submit_review.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                provider_id,
+                service_id,
+                reviewer_name,
+                rating,
+                comment
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('review-success-modal').style.display = 'block';
+            document.getElementById('review-comment-modal').value = '';
+            setTimeout(() => {
+                document.getElementById('review-success-modal').style.display = 'none';
+                document.getElementById('review-modal').classList.remove('show');
+            }, 1500);
+            // Mark booking as reviewed in UI
+            if (currentReviewBooking) {
+                currentReviewBooking.reviewed = true;
+                renderBookings(document.querySelector('#filters .active').dataset.status);
+            }
+        } else {
+            alert('Failed to submit review.' + (data.error ? ('\n' + data.error) : ''));
+        }
+    };
+
+    function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+    function formatDate(dt) {
+        if (!dt) return '-';
+        const d = new Date(dt);
+        return d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+    }
+    function escapeQuotes(str) { return (str || '').replace(/'/g, "&#39;").replace(/"/g, '&quot;'); }
+    window.openEditModal = openEditModal;
+    window.deleteBooking = deleteBooking;
+    window.viewProviderDetails = viewProviderDetails;
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Providers Management</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <nav class="admin-navbar">
+        <div class="navbar-logo">
+            <img src="../images/Logomain.jpg" alt="Local Handz Logo" />
+            <span>Local Handz Admin</span>
+        </div>
+        <div class="navbar-right">
+            <span id="navbar-admin-user"></span>
+            <button class="logout-btn" id="admin-logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../images/Logomain.jpg" alt="Local Handz Admin" />
+                <span>Admin Panel</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li class="active"><i class="fas fa-user-cog"></i> Providers</li>
+                    <li><a href="admin_users.html"><i class="fas fa-users"></i> Users</a></li>
+                    <li><a href="admin_orders.html"><i class="fas fa-clipboard-list"></i> Orders</a></li>
+                    <li><a href="admin_feedback.html"><i class="fas fa-comments"></i> Feedback</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="admin-header">
+                <h1>Service Providers</h1>
+            </header>
+            <section class="admin-table-section">
+                <table class="admin-table" id="providers-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic provider rows here -->
+                    </tbody>
+                </table>
+            </section>
+            <!-- Provider Details Modal -->
+            <div id="provider-details-modal" class="modal" style="display:none;z-index:3000;align-items:center;justify-content:center;">
+                <div class="modal-content" style="background:#fff;max-width:600px;width:95%;padding:24px;position:relative;">
+                    <button id="close-provider-details" style="position:absolute;top:10px;right:10px;font-size:1.2rem;">&times;</button>
+                    <h2>Provider Details</h2>
+                    <div id="provider-details-content">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/admin_providers.js"></script>
+    <script src="js/admin_navbar.js"></script>
+</body>
+</html>

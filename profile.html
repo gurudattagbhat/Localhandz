@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { background: #f6f8fb; }
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #333;
+            color: #fff;
+        }
+        main, .profile-container {
+            margin-top: 150px;
+        }
+        .profile-container {
+            max-width: 650px;
+            margin: 2.5rem auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,123,255,0.08);
+            padding: 2.5rem 2.5rem 2rem 2.5rem;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .profile-header h2 {
+            margin: 0;
+            color: #007bff;
+            font-size: 2.2rem;
+        }
+        .profile-details-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.7rem;
+            margin-bottom: 2.2rem;
+        }
+        .profile-details-table th, .profile-details-table td {
+            text-align: left;
+            padding: 0.8rem 0.7rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 1.08rem;
+        }
+        .profile-details-table th {
+            color: #007bff;
+            font-weight: 600;
+            width: 200px;
+            background: #e9f0fa;
+        }
+        .profile-details-table td {
+            color: #222;
+        }
+        .edit-btn, .save-btn, .cancel-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.6rem 1.4rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            transition: background 0.2s;
+        }
+        .edit-btn:hover, .save-btn:hover {
+            background: #0056b3;
+        }
+        .cancel-btn {
+            background: #ccc;
+            color: #222;
+        }
+        .cancel-btn:hover {
+            background: #bbb;
+        }
+        .profile-success {
+            color: #28a745;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+        .profile-details-table input, .profile-details-table select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: #fff;
+        }
+        .profile-details-table input[type="password"] {
+            letter-spacing: 2px;
+        }
+        .profile-icon {
+            color: #007bff;
+            font-size: 1.5rem;
+            margin-right: 0.7rem;
+        }
+        @media (max-width: 700px) {
+            .profile-container { padding: 1rem; }
+            .profile-details-table th, .profile-details-table td { font-size: 0.98rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar (copied from index.html) -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <div class="navbar-right" style="margin-left:auto;display:flex;align-items:center;gap:1.5rem;">
+                <ul style="display:flex;gap:1.5rem;list-style:none;margin:0;padding:0;">
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+                <div class="profile-icon" id="profile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li id="login-option"><a href="login.html">Login</a></li>
+                    <li><a href="register.html">Sign Up</a></li>
+                    <li><a href="register-service-provider.html">Register as Service Provider</a></li>
+                    <li><a href="profile.html" id="profile-link">Profile</a></li>
+                    <li><a href="#" id="logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h2><i class="fas fa-user-circle profile-icon"></i>My Profile</h2>
+            <div id="profile-success" class="profile-success">Profile updated successfully!</div>
+        </div>
+        <form id="profile-form" autocomplete="off">
+            <table class="profile-details-table">
+                <tr>
+                    <th>Name</th>
+                    <td id="td-name"></td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td id="td-email"></td>
+                </tr>
+                <tr>
+                    <th>Phone</th>
+                    <td id="td-phone"></td>
+                </tr>
+                <tr>
+                    <th>Password</th>
+                    <td id="td-password"></td>
+                </tr>
+                <tr>
+                    <th>Security Question</th>
+                    <td id="td-security-question"></td>
+                </tr>
+                <tr>
+                    <th>Security Answer</th>
+                    <td id="td-security-answer"></td>
+                </tr>
+            </table>
+            <div id="profile-actions">
+                <button type="button" class="edit-btn" id="edit-profile-btn"><i class="fas fa-edit"></i> Edit Profile</button>
+            </div>
+            <div id="edit-actions" style="display:none;">
+                <button type="submit" class="save-btn">Save Changes</button>
+                <button type="button" class="cancel-btn" id="cancel-edit-btn">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <script>
+    // Navbar dropdown logic (copied from index.html)
+    document.addEventListener('DOMContentLoaded', function () {
+        const profileIcon = document.getElementById('profile-icon');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        profileIcon.addEventListener('click', function () {
+            dropdownMenu.classList.toggle('show');
+        });
+        document.addEventListener('click', function (event) {
+            if (!profileIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+        const logoutButton = document.getElementById('logout');
+        logoutButton.addEventListener('click', async function (e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('logout.php');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        console.error('Logout failed');
+                    }
+                } else {
+                    console.error('Logout request failed with status:', response.status);
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        });
+    });
+    const SECURITY_QUESTIONS = [
+        'What is your pet’s name?',
+        'What is your mother’s maiden name?',
+        'What was your first school?',
+        'What is your favorite food?',
+        'What is your favorite color?'
+    ];
+    let profileData = {};
+    let editing = false;
+    // Fetch user details and fill profile
+    async function fetchProfile() {
+        try {
+            const res = await fetch('backend.php?action=getUserDetails');
+            const data = await res.json();
+            if (data.loggedIn && data.user) {
+                profileData = data.user;
+                renderProfileView();
+            }
+        } catch (e) {
+            document.querySelector('.profile-details-table').innerHTML = '<tr><td colspan="2" style="color:red;">Failed to load profile.</td></tr>';
+        }
+    }
+    function renderProfileView() {
+        editing = false;
+        document.getElementById('td-name').textContent = profileData.name;
+        document.getElementById('td-email').textContent = profileData.email;
+        document.getElementById('td-phone').textContent = profileData.phone;
+        document.getElementById('td-password').innerHTML = '********';
+        document.getElementById('td-security-question').textContent = profileData.security_question || '';
+        document.getElementById('td-security-answer').textContent = profileData.security_answer || '';
+        document.getElementById('profile-actions').style.display = 'block';
+        document.getElementById('edit-actions').style.display = 'none';
+    }
+    function renderProfileEdit() {
+        editing = true;
+        document.getElementById('td-name').innerHTML = `<input type="text" name="name" value="${profileData.name || ''}" required>`;
+        document.getElementById('td-email').innerHTML = `<input type="email" name="email" value="${profileData.email || ''}" required>`;
+        document.getElementById('td-phone').innerHTML = `<input type="text" name="phone" value="${profileData.phone || ''}" required>`;
+        document.getElementById('td-password').innerHTML = `<input type="password" name="password" placeholder="New Password (leave blank to keep)" autocomplete="new-password">`;
+        // Security question dropdown (can be left blank)
+        let sqOptions = '<option value="">-- Select a question --</option>' + SECURITY_QUESTIONS.map(q => `<option value="${q.replace(/"/g, '&quot;')}">${q}</option>`).join('');
+        document.getElementById('td-security-question').innerHTML = `<select name="security_question">${sqOptions}</select>`;
+        document.querySelector('select[name="security_question"]').value = profileData.security_question || '';
+        document.getElementById('td-security-answer').innerHTML = `<input type="text" name="security_answer" value="${profileData.security_answer || ''}">`;
+        document.getElementById('profile-actions').style.display = 'none';
+        document.getElementById('edit-actions').style.display = 'block';
+    }
+    document.getElementById('edit-profile-btn').onclick = function() {
+        renderProfileEdit();
+    };
+    document.getElementById('cancel-edit-btn').onclick = function() {
+        renderProfileView();
+    };
+    document.getElementById('profile-form').onsubmit = async function(e) {
+        e.preventDefault();
+        if (!editing) return;
+        const form = e.target;
+        const formData = new FormData(form);
+        const payload = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            password: formData.get('password'),
+            security_question: formData.get('security_question'),
+            security_answer: formData.get('security_answer')
+        };
+        // If security question or answer is blank, allow it
+        if (!payload.security_question) payload.security_question = '';
+        if (!payload.security_answer) payload.security_answer = '';
+        try {
+            const res = await fetch('backend.php?action=updateProfile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('profile-success').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('profile-success').style.display = 'none';
+                }, 2000);
+                // Update local profileData
+                Object.assign(profileData, payload);
+                if (!payload.password) delete profileData.password; // Don't update password if blank
+                renderProfileView();
+            }
+        } catch (e) {
+            alert('Failed to update profile.');
+        }
+    };
+    fetchProfile();
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="../css/analytics.css" rel="stylesheet">
+    <link href="../css/admin.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <button class="close-btn" id="close-sidebar-btn" title="Close Menu"><i class="fas fa-times"></i></button>
+        <nav>
+            <ul>
+                <li><a class="sidebar-item" data-section="dashboard" href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a class="sidebar-item" data-section="providers" href="#"><i class="fas fa-user-cog"></i> Providers</a></li>
+                <li><a class="sidebar-item" data-section="users" href="#"><i class="fas fa-users"></i> Users</a></li>
+                <li><a class="sidebar-item" data-section="orders" href="#"><i class="fas fa-clipboard-list"></i> Orders</a></li>
+                <li><a class="sidebar-item" data-section="feedback" href="#"><i class="fas fa-comments"></i> Feedback</a></li>
+                <li id="logout-menu"><a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+    </div>
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <header>
+            <div class="navbar">
+                <div class="navbar-left">
+                    <button class="toggle-btn" id="toggle-btn" title="Open/Close Menu"><i class="fas fa-bars"></i></button>
+                    <div class="logo">
+                        <img src="../images/Logomain.jpg" alt="Local Handz Logo">
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <button class="mode-toggle-btn" id="mode-toggle-btn" title="Switch Theme">
+                        <i class="fas fa-moon" id="mode-icon"></i>
+                        <span id="mode-label">Dark Mode</span>
+                    </button>
+                    <label class="theme-switch" for="theme-checkbox" title="Toggle theme">
+                        <input type="checkbox" id="theme-checkbox" />
+                        <div class="slider round">
+                            <i class="fas fa-sun slider-icon sun"></i>
+                            <i class="fas fa-moon slider-icon moon"></i>
+                        </div>
+                    </label>
+                    <div class="profile-trigger" id="profile-trigger">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="navbar-profile-name" class="navbar-text">Admin</span>
+                    </div>
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <a href="#" id="edit-profile-link">Edit Profile</a>
+                        <a href="#" id="settings-link">Settings</a>
+                        <a href="admin_login.html" id="logout-link">Log out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Edit Profile Modal -->
+        <div id="edit-profile-modal" class="modal" style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+            <div class="modal-content" style="background:#fff; color:#222; border-radius:8px; max-width:350px; width:90%; margin:auto; padding:24px; position:relative;">
+                <button id="close-edit-profile" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.2rem; cursor:pointer;">&times;</button>
+                <h2>Edit Profile</h2>
+                <form id="edit-profile-form">
+                    <label for="edit-admin-username">Username</label>
+                    <input type="text" id="edit-admin-username" name="username" required style="width:100%;margin-bottom:12px;">
+                    <label for="edit-admin-password">New Password</label>
+                    <input type="password" id="edit-admin-password" name="password" placeholder="Leave blank to keep current password" style="width:100%;margin-bottom:16px;">
+                    <button type="submit" style="width:100%;background:#007bff;color:#fff;border:none;padding:10px;border-radius:6px;font-size:1rem;cursor:pointer;">Save</button>
+                    <div id="edit-profile-msg" style="margin-top:10px;font-size:0.95rem;"></div>
+                </form>
+            </div>
+        </div>
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="dashboard-grid active-section">
+            <div class="stat-card welcome-card">
+                <i class="fas fa-user-shield stat-icon"></i>
+                <div class="stat-info">
+                    <h3>Welcome,</h3>
+                    <p id="admin-name">Admin</p>
+                </div>
+            </div>            <div class="stat-card clickable-card" data-section="users" title="Click to view users">
+                <i class="fas fa-users stat-icon"></i>
+                <div class="stat-info">
+                    <h3>Total Users</h3>
+                    <p id="total-users">0</p>
+                </div>
+                <i class="fas fa-arrow-right click-indicator"></i>
+            </div>
+            <div class="stat-card clickable-card" data-section="providers" title="Click to view providers">
+                <i class="fas fa-user-tie stat-icon"></i>
+                <div class="stat-info">
+                    <h3>Providers</h3>
+                    <p id="total-providers">0</p>
+                </div>
+                <i class="fas fa-arrow-right click-indicator"></i>
+            </div>
+            <div class="stat-card clickable-card" data-section="orders" title="Click to view orders">
+                <i class="fas fa-shopping-cart stat-icon"></i>
+                <div class="stat-info">
+                    <h3>Orders</h3>
+                    <p id="total-orders">0</p>
+                </div>
+                <i class="fas fa-arrow-right click-indicator"></i>
+            </div>
+            <div class="stat-card clickable-card" data-section="feedback" title="Click to view feedback">
+                <i class="fas fa-comments stat-icon"></i>
+                <div class="stat-info">
+                    <h3>Feedback</h3>
+                    <p id="total-feedback">0</p>
+                </div>
+                <i class="fas fa-arrow-right click-indicator"></i>
+            </div>
+        </div>
+        <!-- Providers Section -->
+        <div id="providers" class="admin-table-section" style="display:none">
+            <h2>Service Providers</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="providers-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Users Section -->
+        <div id="users" class="admin-table-section" style="display:none">
+            <h2>Users</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Orders Section -->
+        <div id="orders" class="admin-table-section" style="display:none">
+            <h2>Orders</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Provider</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Feedback Section -->
+        <div id="feedback" class="admin-table-section" style="display:none">
+            <h2>Feedback</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Message</th>
+                            <th>Submitted At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedback-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Settings Section -->
+        <div id="settings" class="settings-section" style="display:none">
+            <h2>Admin Settings</h2>
+            <form id="admin-settings-form">
+                <label for="admin-username">Username</label>
+                <input type="text" id="admin-username" name="username" required>
+                <label for="admin-password">Change Password</label>
+                <input type="password" id="admin-password" name="password" placeholder="Leave blank to keep current password">
+                <button type="submit">Save Settings</button>
+            </form>
+        </div>
+    </div>
+    <script src="js/admin.js"></script>
+</body>
+</html>

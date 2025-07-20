@@ -1,0 +1,280 @@
+<!--
+    reCAPTCHA SETUP REQUIRED:
+    Before using this login form, you need to configure reCAPTCHA keys.
+    
+    1. Get your reCAPTCHA keys from: https://www.google.com/recaptcha/admin
+    2. Replace "YOUR_RECAPTCHA_SITE_KEY" with your actual site key in 2 places:
+       - Line ~108: In the script src attribute
+       - Line ~168: In the grecaptcha.execute() call
+    3. Replace "YOUR_RECAPTCHA_SECRET_KEY" in login.php with your actual secret key
+    
+    For detailed instructions, see: RECAPTCHA_SETUP.md
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css?v=1.1">
+    <style>
+        /* Center the login form */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh; /* Full height minus header */
+            background-color: #f9f9f9;
+        }
+
+        .login-form {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-form h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .login-form input,
+        .login-form select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-form button:hover {
+            background-color: #555;
+        }
+
+        .login-form .register-link,
+        .login-form .forgot-password {
+            display: block;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .login-form .register-link a,
+        .login-form .forgot-password a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .login-form .register-link a:hover,
+        .login-form .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 1rem;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+    </style>
+    <!-- reCAPTCHA v3 Script - Replace YOUR_RECAPTCHA_SITE_KEY with your actual site key -->
+    <!-- Get your keys from: https://www.google.com/recaptcha/admin -->
+    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <div id="welcome-message">Welcome, Guest</div>
+            <ul class="dropdown-menu" id="dropdown-menu">
+                <li id="login-option"><a href="login.html">Login</a></li>
+                <li><a href="register.html">Sign Up</a></li>
+                <li><a href="register-service-provider.html">Register as Service Provider</a></li>
+                <li><a href="#" id="logout">Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Login Form -->
+    <div class="login-container">
+        <form class="login-form" id="login-form">
+            <h2>Login</h2>
+            <div id="error-message" class="error-message"></div>
+            <label for="role">Login as</label>
+            <select id="role" name="role" required>
+                <option value="user">User</option>
+                <option value="service_provider">Service Provider</option>
+            </select>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <button type="submit">Login</button>
+            <div class="forgot-password">
+                <a href="forgot-password.html">Forgot Password?</a>
+            </div>
+            <div class="register-link">
+                Don't have an account? <a href="register.html">Sign Up</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const role = document.getElementById('role').value;
+            const errorMessage = document.getElementById('error-message');
+
+            // Clear previous error messages
+            errorMessage.textContent = '';
+
+            // Get the reCAPTCHA token
+            grecaptcha.ready(async function () {
+                // Replace YOUR_RECAPTCHA_SITE_KEY with your actual site key
+                const recaptchaToken = await grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY', { action: 'login' });
+
+                try {
+                    const response = await fetch('login.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password, role, recaptchaToken }),
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Login failed');
+                    }
+
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    errorMessage.textContent = error.message || 'An unexpected error occurred.';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkLoginStatus();
+
+            // Dropdown toggle functionality
+            const profileIcon = document.getElementById('welcome-message');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+
+            profileIcon.addEventListener('click', function () {
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Close the dropdown if clicked outside
+            document.addEventListener('click', function (event) {
+                if (!profileIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Logout functionality
+            const logoutButton = document.getElementById('logout');
+            logoutButton.addEventListener('click', async function (e) {
+                e.preventDefault();
+                try {
+                    const response = await fetch('logout.php');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Reload the page to reflect the logged-out state
+                        window.location.reload();
+                    } else {
+                        console.error('Logout failed');
+                    }
+                } catch (error) {
+                    console.error('Error during logout:', error);
+                }
+            });
+        });
+
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('backend.php?action=getUserDetails');
+                const data = await response.json();
+
+                const welcomeMessage = document.getElementById('welcome-message');
+                const loginOption = document.getElementById('login-option');
+                const logoutOption = document.getElementById('logout');
+
+                if (data.loggedIn && data.user && data.user.name) {
+                    // Update the welcome message
+                    welcomeMessage.textContent = `Welcome, ${data.user.name}`;
+
+                    // Hide login and sign-up options
+                    if (loginOption) loginOption.style.display = 'none';
+
+                    // Show logout option
+                    if (logoutOption) logoutOption.style.display = 'block';
+                } else {
+                    // Default to Guest
+                    welcomeMessage.textContent = 'Welcome, Guest';
+
+                    // Show login and sign-up options
+                    if (loginOption) loginOption.style.display = 'block';
+
+                    // Hide logout option
+                    if (logoutOption) logoutOption.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                document.getElementById('welcome-message').textContent = 'Welcome, Guest';
+            }
+        }
+    </script>
+</body>
+</html>
