@@ -1,0 +1,111 @@
+Local Handz - Local Services Marketplace
+========================================
+
+Project Overview
+----------------
+Local Handz is a web application designed to connect users with local service providers such as plumbers, electricians, cleaners, and more. The platform offers a modern, user-friendly interface for registration, booking, provider management, and admin oversight. It is built with a focus on security, reliability, and ease of use for both customers and service providers.
+
+Project Creator
+---------------
+Created by Gurudatta G Bhat, student of BCA final year/semester, for the final year project at JSS SMI UG & PG Studies, Dharwad.
+For further help or inquiries, contact the project maintainer.
+
+Technologies Used
+-----------------
+- PHP (Backend logic)
+- MySQL (Database)
+- HTML5, CSS3 (Frontend structure and styling)
+- JavaScript (AJAX, UI interactivity)
+- Font Awesome (Icons)
+- PHPMailer (Email notifications)
+- WAMP/XAMPP/LAMP (Local server environment)
+
+Project Structure
+-----------------
+- assets/           # Static files (css, js, images, uploads)
+- includes/         # PHP includes/utilities
+- config/           # Configuration files
+- templates/        # HTML templates (auth, dashboard, services)
+- api/              # API endpoints
+- admin/            # Admin panel files
+- uploads/          # User/provider uploads
+- index.html        # Landing page
+
+Setup Instructions
+------------------
+1. Clone or download the repository to your web server directory (e.g., c:/wamp64/www/ for WAMP).
+2. Run `composer install` in the project root to install PHPMailer and dependencies.
+3. Create a new MySQL database (e.g., local_handz).
+4. Import the schema from local_handz.sql using phpMyAdmin or MySQL CLI.
+5. Copy config/database.example.php to config/database.php and update with your MySQL credentials.
+6. Set up SMTP credentials in register.php and register-service-provider.php for email notifications.
+7. Ensure the uploads/ directory is writable by the web server.
+8. Start Apache and MySQL via WAMP/XAMPP.
+9. Access the app at http://localhost/code/ (or your configured path).
+
+How to Use Each Part of the Website
+-----------------------------------
+
+1. User Registration & Login
+   - Open `register.html` in your browser to access the user registration form.
+   - Fill in your full name, email address, phone number, and password. The system will automatically check if the email or phone number is already registered and show a clear error if so.
+   - Click the Register button. A loading spinner will appear, and you will see a confirmation message when registration is successful.
+   - You will receive a welcome email at your registered email address.
+   - After successful registration, you are redirected to `login.html`.
+   - On the login page, enter your email and password to access your user dashboard.
+   - If you forget your password, use the `forgot-password.html` page to reset it via email.
+
+2. Service Booking
+   - After logging in, browse available services on the homepage (`index.html`) or the full list at `services.html`.
+   - Click on a service category (e.g., Plumber, Electrician) to see a list of available providers.
+   - Click on a provider to view their details (`provider_details.html`).
+   - Click the “Book Now” button to open the booking form popup.
+   - Enter booking details such as date, time, and any specific requirements.
+   - When you submit the booking, a loading popup with a spinner will appear, followed by a confirmation message.
+   - You will receive a booking confirmation email with all details.
+   - To view or manage your bookings, go to `my_bookings.html`. Here you can see upcoming and past bookings, and cancel if needed.
+
+3. Provider Registration & Dashboard
+   - If you are a service provider, open `register-service-provider.html` to register.
+   - Fill in your name, email, phone, password, and select your service type from the dropdown (all available services are listed).
+   - The system checks for duplicate email/phone and provides instant feedback.
+   - On successful registration, you receive a welcome email and are redirected to the provider login page.
+   - After logging in, access your dashboard at `service_provider_dashboard.html`.
+   - In the dashboard, you can:
+     - Edit your profile and update your service type or contact details.
+     - Add, edit, or remove services you offer.
+     - View all bookings made for your services, including customer details and booking times.
+     - Access analytics to see your service performance and booking trends.
+
+4. Admin Panel
+   - The admin panel is accessed at `admin/admin_login.html` (only for authorized admins).
+   - After logging in, the admin dashboard provides:
+     - User management: View, edit, or remove users.
+     - Provider management: Approve, edit, or remove service providers.
+     - Order management: View all bookings and their statuses.
+     - Feedback management: Review and respond to user/provider feedback.
+     - Analytics: View platform-wide statistics and trends.
+   - Admins can also manage platform settings and monitor system health.
+
+Security Features
+-----------------
+- Password Hashing (secure storage)
+- Session Management (user authentication)
+- Input Validation (client & server side)
+- SQL Injection Prevention (prepared statements)
+- XSS Protection (output sanitization)
+
+Troubleshooting
+---------------
+- Emails not sending? Check SMTP credentials in PHP files and your server’s mail settings.
+- Database errors? Ensure config/database.php is correct and database is imported.
+- Uploads not working? Check uploads/ directory permissions.
+- Spinner/feedback not showing? Ensure JS and CSS files are loaded (see browser console for errors).
+
+Credits & Ownership
+-------------------
+- Created by Gurudatta G Bhat, BCA final year/sem, JSS SMI UG & PG Studies, Dharwad.
+- Uses open-source libraries: PHPMailer, Font Awesome, etc.
+- This project belongs to Gurudatta G Bhat and is intended for educational and demonstration purposes.
+
+For further help, open an issue or contact the project maintainer.

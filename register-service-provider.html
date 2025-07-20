@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Provider Registration - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css?v=1.1">
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .register-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - 80px);
+            padding-top: 2rem;
+            background-color: #f9f9f9;
+            margin-top: 90px; /* Add top margin to prevent overlap */
+        }
+
+        .register-form {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .register-form h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .register-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .register-form input,
+        .register-form select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .register-form button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-form button:hover {
+            background-color: #555;
+        }
+
+        .register-form .login-link {
+            display: block;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .register-form .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .register-form .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .photo-preview {
+            display: block;
+            margin-bottom: 1rem;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .error-message {
+            color: red;
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .profile-dropdown .profile-info {
+            text-align: center;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-dropdown .profile-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-dropdown .profile-info h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .profile-dropdown .profile-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .profile-dropdown a {
+            display: block;
+            padding: 0.8rem;
+            text-decoration: none;
+            color: #333;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown a:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* Loading Spinner */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #register-loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #register-loading > div {
+            background: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            min-width: 220px;
+        }
+
+        #register-loading .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Registration Form -->
+    <div class="register-container">
+        <form class="register-form" id="serviceProviderForm" action="register-service-provider.php" method="POST" enctype="multipart/form-data">
+            <h2>Service Provider Registration</h2>
+            <div id="form-messages"></div>
+
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            <div id="name-error" class="error-message"></div>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <div id="email-error" class="error-message"></div>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+            <div id="phone-error" class="error-message"></div>
+
+            <label for="photo">Upload Profile Photo</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
+            <img id="photoPreview" class="photo-preview" src="#" alt="Photo Preview" style="display: none;">
+            <div id="photo-error" class="error-message"></div>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <div id="password-error" class="error-message"></div>
+
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+            <div id="confirm-password-error" class="error-message"></div>
+
+            <label for="security-question">Security Question</label>
+            <select id="security-question" name="security-question" required>
+                <option value="">Select a security question</option>
+                <option value="pet">What is the name of your first pet?</option>
+                <option value="school">What is the name of your first school?</option>
+                <option value="city">In which city were you born?</option>
+                <option value="nickname">What was your childhood nickname?</option>
+            </select>
+            <div id="security-question-error" class="error-message"></div>
+
+            <label for="security-answer">Answer</label>
+            <input type="text" id="security-answer" name="security-answer" placeholder="Enter your answer" required>
+            <div id="security-answer-error" class="error-message"></div>
+
+            <button type="submit">Register</button>
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="register-loading" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:2000;align-items:center;justify-content:center;">
+        <div style="background:#fff;padding:2rem 2.5rem;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.12);display:flex;flex-direction:column;align-items:center;gap:1.2rem;min-width:220px;">
+            <div class="spinner" style="border:6px solid #f3f3f3;border-top:6px solid #007bff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;"></div>
+            <div style="font-size:1.1rem;font-weight:600;color:#222;">Registering...</div>
+        </div>
+    </div>
+
+    <script>
+        // Photo preview functionality
+        document.getElementById('photo').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            const photoPreview = document.getElementById('photoPreview');
+            const photoError = document.getElementById('photo-error');
+
+            if (file) {
+                // Check if the file is an image
+                if (file.type.startsWith('image/')) {
+                    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                        photoError.textContent = 'File size exceeds 2MB limit';
+                        photoPreview.style.display = 'none';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        photoPreview.src = e.target.result;
+                        photoPreview.style.display = 'block';
+                        photoError.textContent = '';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    photoError.textContent = 'Please select a valid image file (JPG, PNG, GIF)';
+                    photoPreview.style.display = 'none';
+                }
+            } else {
+                photoPreview.style.display = 'none';
+                photoError.textContent = '';
+            }
+        });
+
+        // Form submission via AJAX
+        document.getElementById('serviceProviderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            document.getElementById('register-loading').style.display = 'flex';
+            document.getElementById('form-messages').innerHTML = '';
+            // Hide previous errors
+            document.getElementById('email-error').textContent = '';
+            document.getElementById('email-error').style.display = 'none';
+            document.getElementById('phone-error').textContent = '';
+            document.getElementById('phone-error').style.display = 'none';
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('register-service-provider.php', { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.success) {
+                    // Show success in loading popup
+                    document.getElementById('register-loading').innerHTML = `<div style='background:#fff;padding:2rem 2.5rem;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.12);display:flex;flex-direction:column;align-items:center;gap:1.2rem;min-width:220px;'><div class='spinner' style='border:6px solid #f3f3f3;border-top:6px solid #28a745;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;'></div><div style='font-size:1.1rem;font-weight:600;color:#28a745;'>Registration successful! Redirecting to login...</div></div>`;
+                    setTimeout(() => { window.location.href = 'login.html'; }, 1800);
+                } else if (data.message && data.message.toLowerCase().includes('already exists')) {
+                    document.getElementById('register-loading').style.display = 'none';
+                    if (data.message.toLowerCase().includes('email')) {
+                        document.getElementById('email-error').textContent = 'Account already exists with this email.';
+                        document.getElementById('email-error').style.display = 'block';
+                    }
+                    if (data.message.toLowerCase().includes('phone')) {
+                        document.getElementById('phone-error').textContent = 'Account already exists with this phone number.';
+                        document.getElementById('phone-error').style.display = 'block';
+                    }
+                    // If generic, show both
+                    if (!data.message.toLowerCase().includes('email') && !data.message.toLowerCase().includes('phone')) {
+                        document.getElementById('email-error').textContent = 'Account already exists with this email or phone number.';
+                        document.getElementById('email-error').style.display = 'block';
+                        document.getElementById('phone-error').textContent = 'Account already exists with this email or phone number.';
+                        document.getElementById('phone-error').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('register-loading').style.display = 'none';
+                    document.getElementById('form-messages').innerHTML = `<div class='alert alert-danger'>${data.message || 'Registration failed. Please try again.'}</div>`;
+                }
+            } catch (err) {
+                document.getElementById('register-loading').style.display = 'none';
+                document.getElementById('form-messages').innerHTML = '<div class="alert alert-danger">Registration failed. Please try again.</div>';
+            }
+        });
+
+        // Profile dropdown functionality
+        const profileIcon = document.getElementById('profile-icon');
+        const profileDropdown = document.getElementById('profile-dropdown');
+
+        profileIcon.addEventListener('click', function () {
+            profileDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', function (event) {
+            if (!profileIcon.contains(event.target) && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+
+        // Handle "View Profile" link
+        document.getElementById('view-profile-link').addEventListener('click', function (e) {
+            e.preventDefault();
+            const sections = document.querySelectorAll('.main-content > div');
+            sections.forEach(section => section.classList.remove('active-section'));
+            document.getElementById('view-profile').classList.add('active-section');
+        });
+
+        // Handle "Edit Profile" link
+        document.getElementById('edit-profile-link').addEventListener('click', function (e) {
+            e.preventDefault();
+            const sections = document.querySelectorAll('.main-content > div');
+            sections.forEach(section => section.classList.remove('active-section'));
+            document.getElementById('edit-profile').classList.add('active-section');
+        });
+
+        // Handle "Settings" link
+        document.getElementById('settings-link').addEventListener('click', function (e) {
+            e.preventDefault();
+            const sections = document.querySelectorAll('.main-content > div');
+            sections.forEach(section => section.classList.remove('active-section'));
+            document.getElementById('settings').classList.add('active-section');
+        });
+
+        // Handle "Logout" link
+        document.getElementById('logout-link').addEventListener('click', async function (e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('logout.php');
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        });
+    </script>
+</body>
+</html>

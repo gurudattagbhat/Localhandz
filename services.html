@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Providers</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .service-container {
+            padding: 2rem;
+        }
+
+        .service-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .service-providers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .provider-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .provider-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .provider-card h3 {
+            margin: 1rem 0 0.5rem;
+        }
+
+        .provider-card p {
+            margin: 0.5rem 0;
+        }
+
+        .provider-card button {
+            padding: 0.8rem 1.5rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .provider-card button:hover {
+            background-color: #555;
+        }
+
+        .rating {
+            margin-top: 0.5rem;
+        }
+
+        .rating span {
+            font-size: 1.2rem;
+            color: gold;
+        }
+
+        .booking-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .booking-form h3 {
+            margin-bottom: 1rem;
+        }
+
+        .booking-form input,
+        .booking-form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .booking-form button {
+            padding: 0.8rem 1.5rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .booking-form button:hover {
+            background-color: #555;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="service-title">Service Providers</h1>
+    </div>
+
+    <div class="service-container">
+        <h2 class="service-title" id="selected-service">Loading...</h2>
+        <div class="service-providers" id="providers-container">
+            <!-- Service providers will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Booking Form -->
+    <div class="overlay" id="overlay"></div>
+    <div class="booking-form" id="booking-form">
+        <h3>Book Service</h3>
+        <input type="text" id="customer-name" placeholder="Your Name" required>
+        <input type="text" id="customer-contact" placeholder="Your Contact Number" required>
+        <textarea id="booking-details" placeholder="Additional Details" rows="4"></textarea>
+        <button id="submit-booking">Submit Booking</button>
+        <button id="close-booking">Cancel</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const serviceTitle = document.getElementById('selected-service');
+            const providersContainer = document.getElementById('providers-container');
+            const bookingForm = document.getElementById('booking-form');
+            const overlay = document.getElementById('overlay');
+            let selectedProviderId = null;
+
+            // Fetch service name from query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const serviceName = urlParams.get('service');
+
+            if (serviceName) {
+                serviceTitle.textContent = serviceName;
+                fetchProviders(serviceName);
+            } else {
+                serviceTitle.textContent = 'Service not found';
+            }
+
+            // Fetch service providers
+            async function fetchProviders(service) {
+                try {
+                    const response = await fetch(`backend.php?action=getProviders&service=${encodeURIComponent(service)}`);
+                    const data = await response.json();
+
+                    if (data.success && data.providers.length > 0) {
+                        providersContainer.innerHTML = data.providers.map(provider => `
+                            <div class="provider-card">
+                                <img src="${provider.image}" alt="${provider.name}">
+                                <h3>${provider.name}</h3>
+                                <p>${provider.description}</p>
+                                <div class="rating">
+                                    ${'★'.repeat(provider.rating)}${'☆'.repeat(5 - provider.rating)}
+                                </div>
+                                <button class="book-btn" data-id="${provider.id}">Book Now</button>
+                            </div>
+                        `).join('');
+                    } else {
+                        providersContainer.innerHTML = '<p>No providers available for this service.</p>';
+                    }
+                } catch (error) {
+                    console.error('Error fetching providers:', error);
+                    providersContainer.innerHTML = '<p>Failed to load providers. Please try again later.</p>';
+                }
+            }
+
+            // Open booking form
+            providersContainer.addEventListener('click', function (e) {
+                if (e.target.classList.contains('book-btn')) {
+                    selectedProviderId = e.target.getAttribute('data-id');
+                    bookingForm.style.display = 'block';
+                    overlay.style.display = 'block';
+                }
+            });
+
+            // Close booking form
+            document.getElementById('close-booking').addEventListener('click', function () {
+                bookingForm.style.display = 'none';
+                overlay.style.display = 'none';
+            });
+
+            // Submit booking
+            document.getElementById('submit-booking').addEventListener('click', async function () {
+                const name = document.getElementById('customer-name').value.trim();
+                const contact = document.getElementById('customer-contact').value.trim();
+                const details = document.getElementById('booking-details').value.trim();
+
+                if (!name || !contact) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('backend.php?action=bookService', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            providerId: selectedProviderId,
+                            name,
+                            contact,
+                            details,
+                        }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert('Booking successful!');
+                        bookingForm.style.display = 'none';
+                        overlay.style.display = 'none';
+                    } else {
+                        alert('Booking failed. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error submitting booking:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

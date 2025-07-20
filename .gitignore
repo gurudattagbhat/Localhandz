@@ -1,0 +1,68 @@
+# Local Handz Project - .gitignore
+
+# Sensitive configuration files
+config/database.php
+db_connect.php
+config/config.php
+
+# Log files
+*.log
+php_errors.log
+error.log
+access.log
+debug.log
+app.log
+
+# Sensitive files containing actual credentials
+# (These files should be manually created/configured on each environment)
+config/email_config.php
+config/credentials.php
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Vendor directories (if using Composer)
+# Note: Currently vendor/ is included in the repo, but consider excluding it
+# vendor/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+tmp/
+temp/
+cache/
+
+# Upload directories (optional - depends on your setup)
+# uploads/
+
+# Node modules (if using Node.js for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build directories
+dist/
+build/

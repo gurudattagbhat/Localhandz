@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css?v=1.1">
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .register-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - 80px);
+            padding-top: 2rem;
+            background-color: #f9f9f9;
+            margin-top: 90px; /* Added top margin to prevent overlap with fixed navbar */
+        }
+
+        .register-form {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .register-form h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .register-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .register-form input,
+        .register-form select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .register-form .error-message {
+            color: red;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .register-form button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-form button:hover {
+            background-color: #555;
+        }
+
+        .register-form .login-link {
+            display: block;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .register-form .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .register-form .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .navbar ul li a:hover {
+            text-decoration: underline;
+        }
+
+        .logo-img {
+            height: 50px;
+        }
+
+        /* Loading Spinner Styling */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #register-loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #register-loading > div {
+            background: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            min-width: 220px;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Registration Form -->
+    <div class="register-container">
+        <form class="register-form" id="registerForm" action="register.php" method="POST">
+            <h2>Register</h2>
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            <span class="error-message" id="nameError">Please enter your full name.</span>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <span class="error-message" id="emailError">Please enter a valid email address.</span>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+            <span class="error-message" id="phoneError">Please enter a valid 10-digit phone number.</span>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <span class="error-message" id="passwordError">Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.</span>
+
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm your password" required>
+            <span class="error-message" id="confirmPasswordError">Passwords do not match.</span>
+
+            <label for="security-question">Security Question</label>
+            <select id="security-question" name="security-question" required>
+                <option value="">Select a security question</option>
+                <option value="pet">What is the name of your first pet?</option>
+                <option value="school">What is the name of your first school?</option>
+                <option value="city">In which city were you born?</option>
+                <option value="nickname">What was your childhood nickname?</option>
+            </select>
+            <span class="error-message" id="securityQuestionError">Please select a security question.</span>
+
+            <label for="security-answer">Answer</label>
+            <input type="text" id="security-answer" name="security-answer" placeholder="Enter your answer" required>
+            <span class="error-message" id="securityAnswerError">Please provide an answer to the security question.</span>
+
+            <button type="submit">Register</button>
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="register-loading">
+        <div>
+            <div class="spinner"></div>
+            <div style="font-size:1.1rem;font-weight:600;color:#222;">Registering...</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            let isValid = true;
+            document.querySelectorAll('.error-message').forEach(e => e.style.display = 'none');
+
+            // Validate name
+            const name = document.getElementById('name').value.trim();
+            if (!name) {
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate email
+            const email = document.getElementById('email').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate phone
+            const phone = document.getElementById('phone').value.trim();
+            if (!/^[0-9]{10}$/.test(phone)) {
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate password
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!passwordRegex.test(password)) {
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPasswordError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate security question
+            const securityQuestion = document.getElementById('security-question').value;
+            if (!securityQuestion) {
+                document.getElementById('securityQuestionError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate security answer
+            const securityAnswer = document.getElementById('security-answer').value.trim();
+            if (!securityAnswer) {
+                document.getElementById('securityAnswerError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            document.getElementById('register-loading').style.display = 'flex';
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('register.php', { method: 'POST', body: formData });
+                const text = await response.text();
+                // Remove any previous success message
+                const prevMsg = document.getElementById('register-success-msg');
+                if (prevMsg) prevMsg.remove();
+                if (text.includes('Registration successful')) {
+                    // Show success in loading popup
+                    document.getElementById('register-loading').innerHTML = `<div style='background:#fff;padding:2rem 2.5rem;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.12);display:flex;flex-direction:column;align-items:center;gap:1.2rem;min-width:220px;'><div class='spinner' style='border:6px solid #f3f3f3;border-top:6px solid #28a745;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;'></div><div style='font-size:1.1rem;font-weight:600;color:#28a745;'>Registration successful! Redirecting to login...</div></div>`;
+                    setTimeout(() => { window.location.href = 'login.html'; }, 1800);
+                } else if (text.includes('already exists')) {
+                    document.getElementById('register-loading').style.display = 'none';
+                    if (text.includes('email')) {
+                        document.getElementById('emailError').textContent = 'Account already exists with this email or phone number.';
+                        document.getElementById('emailError').style.display = 'block';
+                    }
+                    if (text.includes('phone')) {
+                        document.getElementById('phoneError').textContent = 'Account already exists with this email or phone number.';
+                        document.getElementById('phoneError').style.display = 'block';
+                    }
+                } else if (text.match(/Full name|Invalid email|Phone number|Passwords do not match|Password must|Security question|Security answer/)) {
+                    document.getElementById('register-loading').style.display = 'none';
+                    // Show validation errors from backend
+                    const errorLines = text.split(/<br\s*\/?>|\n/);
+                    errorLines.forEach(line => {
+                        if (line.includes('Full name')) document.getElementById('nameError').textContent = line, document.getElementById('nameError').style.display = 'block';
+                        if (line.includes('email')) document.getElementById('emailError').textContent = line, document.getElementById('emailError').style.display = 'block';
+                        if (line.includes('Phone number')) document.getElementById('phoneError').textContent = line, document.getElementById('phoneError').style.display = 'block';
+                        if (line.includes('Passwords do not match')) document.getElementById('confirmPasswordError').textContent = line, document.getElementById('confirmPasswordError').style.display = 'block';
+                        if (line.includes('Password must')) document.getElementById('passwordError').textContent = line, document.getElementById('passwordError').style.display = 'block';
+                        if (line.includes('Security question')) document.getElementById('securityQuestionError').textContent = line, document.getElementById('securityQuestionError').style.display = 'block';
+                        if (line.includes('Security answer')) document.getElementById('securityAnswerError').textContent = line, document.getElementById('securityAnswerError').style.display = 'block';
+                    });
+                } else {
+                    document.getElementById('register-loading').style.display = 'none';
+                    let msg = document.createElement('div');
+                    msg.textContent = text.replace(/<[^>]+>/g, '').trim() || 'Registration failed. Please try again.';
+                    msg.style.color = 'red';
+                    msg.style.textAlign = 'center';
+                    msg.style.marginBottom = '1rem';
+                    msg.id = 'register-success-msg';
+                    document.getElementById('registerForm').prepend(msg);
+                }
+            } catch (err) {
+                document.getElementById('register-loading').style.display = 'none';
+                let msg = document.createElement('div');
+                msg.textContent = 'Registration failed. Please try again.';
+                msg.style.color = 'red';
+                msg.style.textAlign = 'center';
+                msg.style.marginBottom = '1rem';
+                msg.id = 'register-success-msg';
+                document.getElementById('registerForm').prepend(msg);
+            }
+        });
+    </script>
+</body>
+</html>

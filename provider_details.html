@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Details - Local Handz</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            background: #f6f8fb;
+        }
+        .main-content {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 0 2vw;
+            box-sizing: border-box;
+        }
+        .provider-card-modern {
+            display: flex;
+            gap: 2rem;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            border: 1px solid #e0e8f0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .provider-card-modern img {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: none;
+        }
+        .provider-card-modern .provider-info {
+            flex: 1;
+        }
+        .provider-card-modern h2 {
+            margin: 0 0 0.5rem 0;
+            color: #222;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .provider-card-modern .provider-rating {
+            color: #ffc107;
+            margin-bottom: 0.5rem;
+        }
+        .provider-card-modern .provider-price {
+            color: #28a745;
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+        }
+        .provider-card-modern .provider-description {
+            color: #555;
+            margin-bottom: 1rem;
+        }
+        .provider-card-modern .cart-btn {
+            margin-top: 1rem;
+        }
+        .divider {
+            border: none;
+            border-top: 1.5px solid #e0e8f0;
+            margin: 2.2rem 0 2rem 0;
+        }
+        .booking-details {
+            display: block;
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+        .booking-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        .location-input {
+            display: flex;
+            gap: 1rem;
+        }
+        .location-input input {
+            flex: 1;
+        }
+        .location-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .location-btn:hover {
+            background: #5a6268;
+        }
+        .location-map {
+            width: 100%;
+            height: 300px;
+            min-height: 200px;
+            max-width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 1rem;
+            border: 1px solid #ddd;
+        }
+        .leaflet-control-zoom, .leaflet-control-attribution {
+            display: block !important;
+        }
+        .booking-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        .booking-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        }
+        @media (max-width: 600px) {
+            .location-input {
+                flex-direction: column;
+            }
+        }
+        /* Navbar Styling */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #333;
+            color: #fff;
+        }
+        /* Add top margin to main content to prevent overlap */
+        main {
+            margin-top: 90px;
+        }
+        /* Spinner Animation for popup */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar" style="display: flex; align-items: center; width: 100%; box-sizing: border-box;">
+            <div class="logo" style="margin-right: auto;">
+                <a href="index.html">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo" class="logo-img">
+                </a>
+            </div>
+            <div class="navbar-right" style="display: flex; align-items: center; gap: 1.5rem; margin-left: auto; justify-content: flex-end;">
+                <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+                <a href="cart.html" class="cart-icon">
+                    🛒
+                    <span class="cart-count">0</span>
+                </a>
+                <div class="profile-icon" id="profile-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <ul class="dropdown-menu" id="dropdown-menu">
+                    <li id="login-option"><a href="login.html">Login</a></li>
+                    <li><a href="register.html">Sign Up</a></li>
+                    <li><a href="register-service-provider.html">Register as Service Provider</a></li>
+                    <li><a href="#" id="logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="main-content">
+            <div class="provider-card-modern" id="provider-details-container">
+                <img id="provider-image" src="" alt="Provider Image">
+                <div class="provider-info">
+                    <h2 id="provider-name"></h2>
+                    <div class="provider-rating" id="provider-rating"></div>
+                    <div class="provider-price" id="provider-price"></div>
+                    <div class="provider-description" id="provider-description"></div>
+                    <div style="display:flex;gap:1rem;margin-top:1rem;">
+                        <button class="cart-btn" id="add-to-cart-btn" style="flex:1;">Add to Cart</button>
+                        <button class="booking-btn" id="book-now-btn" style="flex:1;">Book Now</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Reviews Section -->
+            <div class="reviews-section" style="background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);padding:2rem 2rem 1.5rem 2rem;margin-bottom:2rem;">
+                <h3 style="color:#007bff;font-weight:700;margin-top:0;margin-bottom:1.2rem;">Customer Reviews</h3>
+                <div id="reviews-list" style="display:flex;flex-direction:column;gap:1.2rem;"></div>
+                <hr style="margin:2rem 0 1.2rem 0;border:none;border-top:1px solid #e0e8f0;" />
+                <button id="show-review-form-btn" class="cart-btn" style="width:auto;max-width:200px;margin-bottom:1rem;">Write a Review</button>
+                <div id="leave-review-form-container" style="display:none;">
+                    <h4 style="margin:0 0 0.7rem 0;font-size:1.1rem;color:#222;font-weight:600;">Leave a Review</h4>
+                    <form id="leave-review-form" style="display:flex;flex-direction:column;gap:0.7rem;">
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <span style="font-weight:500;">Your Name:</span>
+                            <input type="text" id="reviewer-name" placeholder="Your Name" required style="flex:1;padding:0.5rem 1rem;border-radius:8px;border:1px solid #ced4da;font-size:1rem;" readonly>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <span style="font-weight:500;">Your Rating:</span>
+                            <div id="star-rating-input" style="display:flex;gap:0.2rem;font-size:1.3rem;cursor:pointer;"></div>
+                        </div>
+                        <textarea id="review-comment" rows="2" placeholder="Write your review..." style="padding:0.8rem 1rem;border-radius:8px;border:1px solid #ced4da;font-size:1rem;"></textarea>
+                        <button type="submit" class="booking-btn" style="width:auto;max-width:180px;align-self:flex-end;">Submit Review</button>
+                        <div id="review-success" style="color:#28a745;font-weight:600;display:none;">Thank you for your review!</div>
+                    </form>
+                </div>
+            </div>
+            <hr class="divider" />
+            <!-- Modern Booking Details Section (copied from service_booking.html) -->
+            <div class="booking-details" id="booking-details" style="display:none;">
+                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                    <img id="booking-provider-image" src="" alt="Provider Image" style="width:48px;height:48px;border-radius:8px;object-fit:cover;box-shadow:none;">
+                    <h2 id="booking-provider-name" style="margin:0;"></h2>
+                </div>
+                <form id="booking-form" class="booking-form">
+                    <div class="form-group">
+                        <label for="service-date">Select Date</label>
+                        <input type="date" id="service-date" name="service-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="service-time">Select Time</label>
+                        <select id="service-time" name="service-time" required>
+                            <option value="">Select a time slot</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Service Location</label>
+                        <div class="location-input">
+                            <input type="text" id="service-location" name="service-location" placeholder="Enter your location or use the map" required>
+                            <button type="button" class="location-btn" id="fetch-location"><i class="fas fa-crosshairs"></i> Use My Location</button>
+                        </div>
+                        <div id="location-map" class="location-map"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="service-notes">Additional Notes</label>
+                        <textarea id="service-notes" name="service-notes" rows="2" placeholder="Any specific requirements or instructions"></textarea>
+                    </div>
+                    <button type="submit" class="booking-btn">Confirm Booking</button>
+                    <div id="booking-success" style="display:none;color:green;text-align:center;">Booking successful!</div>
+                </form>
+            </div>
+            <div id="booking-progress-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:2000;align-items:center;justify-content:center;">
+                <div style="background:#fff;padding:2.5rem 2.5rem 2rem 2.5rem;border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,0.12);display:flex;flex-direction:column;align-items:center;gap:1.2rem;min-width:260px;">
+                    <div class="spinner" style="border:6px solid #f3f3f3;border-top:6px solid #007bff;border-radius:50%;width:48px;height:48px;animation:spin 1s linear infinite;"></div>
+                    <div style="font-size:1.15rem;font-weight:600;color:#222;">Booking in progress...</div>
+                </div>
+            </div>
+            <!-- Booking Loading Popup -->
+            <div id="booking-loading-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:3000;align-items:center;justify-content:center;">
+                <div id="booking-loading-content" style="background:#fff;padding:2rem 2.5rem;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.12);display:flex;flex-direction:column;align-items:center;gap:1.2rem;min-width:220px;">
+                    <div class="spinner"></div>
+                    <div id="booking-loading-message" style="font-size:1.1rem;font-weight:600;color:#222;">Booking in progress...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    L.Icon.Default.imagePath = '';
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png'
+    });
+
+    // Utility: update cart count in header using backend
+    async function updateCartCount() {
+        try {
+            const response = await fetch('cart_api.php?action=fetch');
+            const data = await response.json();
+            const cartCount = document.querySelector('.cart-count');
+            cartCount.textContent = data.success ? data.cart.length : 0;
+        } catch (err) {
+            const cartCount = document.querySelector('.cart-count');
+            cartCount.textContent = 0;
+        }
+    }
+    updateCartCount();
+
+    // Add to Cart functionality using backend
+    async function addToCart(serviceObj) {
+        try {
+            const response = await fetch('cart_api.php?action=add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(serviceObj)
+            });
+            const data = await response.json();
+            if (data.success) {
+                updateCartCount();
+                let toast = document.createElement('div');
+                toast.textContent = 'Added to cart!';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '30px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.background = '#28a745';
+                toast.style.color = '#fff';
+                toast.style.padding = '1rem 2rem';
+                toast.style.borderRadius = '8px';
+                toast.style.zIndex = 9999;
+                document.body.appendChild(toast);
+                setTimeout(() => { toast.remove(); }, 1500);
+            } else {
+                alert(data.error || 'Failed to add to cart');
+            }
+        } catch (err) {
+            alert('Failed to add to cart.');
+        }
+    }
+
+    // Get provider_id and service_id from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const providerId = urlParams.get('provider_id');
+    const serviceId = urlParams.get('service_id');
+
+    // Fetch provider/service details from backend
+    async function fetchProviderDetails() {
+        try {
+            const response = await fetch(`get_provider_details.php?provider_id=${providerId}&service_id=${serviceId}`);
+            if (!response.ok) throw new Error('Failed to fetch provider details');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'No details');
+            return data.provider;
+        } catch (err) {
+            document.getElementById('booking-details').innerHTML = `<p style='color:red;font-size:1.2rem;text-align:center;'>Error loading provider details. Please try again or contact support.</p>`;
+        }
+    }
+
+    // Fetch reviews for this provider and service
+    async function fetchProviderReviews() {
+        try {
+            const response = await fetch(`get_provider_reviews.php?provider_id=${providerId}&service_id=${serviceId}`);
+            if (!response.ok) throw new Error('Failed to fetch reviews');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'No reviews');
+            return data.reviews || [];
+        } catch (err) {
+            return [];
+        }
+    }
+
+    // Render reviews
+    function renderReviews(reviews) {
+        const reviewsList = document.getElementById('reviews-list');
+        if (!reviews || reviews.length === 0) {
+            reviewsList.innerHTML = '<div style="color:#888;">No reviews yet. Be the first to review!</div>';
+            return;
+        }
+        reviewsList.innerHTML = reviews.map(r => `
+            <div style="background:#f6f8fb;border-radius:8px;padding:1rem 1.2rem;">
+                <div style="display:flex;align-items:center;gap:0.7rem;">
+                    <span style="color:#ffc107;font-size:1.1rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                    <span style="font-weight:600;color:#222;">${r.reviewer_name || 'Anonymous'}</span>
+                </div>
+                <div style="color:#444;margin-top:0.3rem;">${r.comment || ''}</div>
+            </div>
+        `).join('');
+    }
+
+    // Star rating input logic
+    function renderStarRatingInput() {
+        const starInput = document.getElementById('star-rating-input');
+        let currentRating = 0;
+        function updateStars(rating) {
+            starInput.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.innerHTML = i <= rating ? '★' : '☆';
+                star.style.color = i <= rating ? '#ffc107' : '#ccc';
+                star.onclick = () => {
+                    currentRating = i;
+                    updateStars(currentRating);
+                };
+                starInput.appendChild(star);
+            }
+        }
+        updateStars(currentRating);
+        return () => currentRating;
+    }
+
+    // Initialize the map
+    let bookingMap, bookingMarker;
+
+    function initializeMap() {
+        setTimeout(() => {
+            const mapContainer = document.getElementById('location-map');
+            if (!mapContainer) return;
+            if (!bookingMap) {
+                bookingMap = L.map('location-map', {
+                    zoomControl: true,
+                    attributionControl: true
+                }).setView([20.5937, 78.9629], 5); // Center on India
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(bookingMap);
+                bookingMarker = L.marker([20.5937, 78.9629], {draggable:true}).addTo(bookingMap);
+                bookingMarker.on('dragend', function(e) {
+                    const latlng = bookingMarker.getLatLng();
+                    fetchAddressFromCoords(latlng.lat, latlng.lng);
+                });
+            } else {
+                bookingMap.invalidateSize();
+            }
+        }, 200);
+    }
+
+    // Fetch address from coordinates (reverse geocoding)
+    async function fetchAddressFromCoords(lat, lng) {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await response.json();
+            if (data && data.display_name) {
+                document.getElementById('service-location').value = data.display_name;
+            }
+        } catch (e) {}
+    }
+
+    // Use the user's current location
+    document.getElementById('fetch-location').addEventListener('click', function (e) {
+        e.preventDefault();
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Update the map view and marker position
+                bookingMap.setView([lat, lng], 15);
+                bookingMarker.setLatLng([lat, lng]);
+
+                // Fetch the address for the current location
+                fetchAddressFromCoords(lat, lng);
+            }, function () {
+                alert('Unable to fetch your location.');
+            });
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    });
+
+    // Initialize the map when the page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeMap();
+    });
+
+    // Modern booking form logic (copied from service_booking.html)
+    function selectProvider(provider, doScroll = true) {
+        // Show booking details section
+        const bookingDetails = document.getElementById('booking-details');
+        bookingDetails.style.display = 'block';
+        document.getElementById('booking-provider-name').textContent = `Book with ${provider.name}`;
+        document.getElementById('booking-provider-image').src = provider.image || 'images/default-provider.jpg';
+        // Optionally, store provider info for booking submission
+        bookingDetails.dataset.providerId = provider.id;
+        bookingDetails.dataset.serviceId = provider.service_id;
+        setTimeout(() => {
+            if (!bookingMap) {
+                bookingMap = L.map('location-map', {
+                    zoomControl: true,
+                    attributionControl: true
+                }).setView([20.5937, 78.9629], 5); // Center on India
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(bookingMap);
+                bookingMarker = L.marker([20.5937, 78.9629], {draggable:true}).addTo(bookingMap);
+                bookingMarker.on('dragend', function(e) {
+                    const latlng = bookingMarker.getLatLng();
+                    fetchAddressFromCoords(latlng.lat, latlng.lng);
+                });
+            } else {
+                bookingMap.invalidateSize();
+            }
+        }, 200);
+        // Scroll to booking form if doScroll is true
+        if (doScroll) {
+            bookingDetails.scrollIntoView({behavior: 'smooth'});
+        }
+    }
+
+    document.getElementById('fetch-location').onclick = function(e) {
+        e.preventDefault();
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                bookingMap.setView([lat, lng], 15);
+                bookingMarker.setLatLng([lat, lng]);
+                fetchAddressFromCoords(lat, lng);
+            }, function() {
+                alert('Unable to fetch your location.');
+            });
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    };
+
+    // Booking form submit logic
+    const bookingForm = document.getElementById('booking-form');
+    const bookingLoadingPopup = document.getElementById('booking-loading-popup');
+    const bookingLoadingMessage = document.getElementById('booking-loading-message');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            // Check login status before booking
+            try {
+                const loginRes = await fetch('check_session.php');
+                const loginData = await loginRes.json();
+                if (!loginData.loggedIn) {
+                    if (confirm('You must be logged in to book a service. Do you want to login now?')) {
+                        window.location.href = 'login.html';
+                    }
+                    return;
+                }
+            } catch (err) {
+                alert('Unable to check login status. Please try again.');
+                return;
+            }
+            // Get provider/service details from the bookingDetails dataset
+            const bookingDetails = document.getElementById('booking-details');
+            const providerId = bookingDetails?.dataset.providerId;
+            const serviceId = bookingDetails?.dataset.serviceId;
+            const location = document.getElementById('service-location').value;
+            const date = document.getElementById('service-date').value;
+            const time = document.getElementById('service-time').value;
+            const requestDate = date && time ? `${date} ${time}:00` : '';
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('provider_id', providerId);
+            formData.append('service_id', serviceId);
+            formData.append('service-location', location);
+            formData.append('request_date', requestDate);
+            // Show popup loading
+            bookingLoadingPopup.style.display = 'flex';
+            bookingLoadingMessage.textContent = 'Booking in progress...';
+            bookingLoadingMessage.style.color = '#222';
+            bookingLoadingPopup.querySelector('.spinner').style.borderTopColor = '#007bff';
+            // Send to backend (do not wait for email delivery)
+            try {
+                const response = await fetch('book_service.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    bookingLoadingMessage.textContent = 'Booking confirmed! Redirecting...';
+                    bookingLoadingMessage.style.color = '#28a745';
+                    bookingLoadingPopup.querySelector('.spinner').style.borderTopColor = '#28a745';
+                    setTimeout(() => {
+                        bookingLoadingPopup.style.display = 'none';
+                        document.getElementById('booking-details').style.display = 'none';
+                        window.location.href = 'my_bookings.html';
+                    }, 1800);
+                    bookingForm.reset();
+                } else {
+                    bookingLoadingMessage.textContent = data.error || 'Booking failed.';
+                    bookingLoadingMessage.style.color = 'red';
+                    bookingLoadingPopup.querySelector('.spinner').style.borderTopColor = '#dc3545';
+                    setTimeout(() => {
+                        bookingLoadingPopup.style.display = 'none';
+                    }, 2200);
+                }
+            } catch (err) {
+                bookingLoadingMessage.textContent = 'Booking failed. Please try again.';
+                bookingLoadingMessage.style.color = 'red';
+                bookingLoadingPopup.querySelector('.spinner').style.borderTopColor = '#dc3545';
+                setTimeout(() => {
+                    bookingLoadingPopup.style.display = 'none';
+                }, 2200);
+            }
+        });
+    }
+
+    const TIMESLOTS = [
+        { value: '09:00', label: '09:00 AM' },
+        { value: '10:00', label: '10:00 AM' },
+        { value: '11:00', label: '11:00 AM' },
+        { value: '12:00', label: '12:00 PM' },
+        { value: '13:00', label: '01:00 PM' },
+        { value: '14:00', label: '02:00 PM' },
+        { value: '15:00', label: '03:00 PM' },
+        { value: '16:00', label: '04:00 PM' },
+        { value: '17:00', label: '05:00 PM' },
+        { value: '18:00', label: '06:00 PM' },
+        { value: '19:00', label: '07:00 PM' },
+        { value: '20:00', label: '08:00 PM' },
+        { value: '21:00', label: '09:00 PM' },
+        { value: '22:00', label: '10:00 PM' }
+    ];
+
+    async function fetchBookedTimes(providerId, date) {
+        try {
+            const response = await fetch(`get_booked_times.php?provider_id=${providerId}&date=${date}`);
+            const data = await response.json();
+            if (data.success && Array.isArray(data.booked_times)) {
+                return data.booked_times; // array of 'HH:MM' strings
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    async function updateTimeslotDropdown() {
+        const bookingDetails = document.getElementById('booking-details');
+        const providerId = bookingDetails?.dataset.providerId;
+        const date = document.getElementById('service-date').value;
+        const select = document.getElementById('service-time');
+        if (!providerId || !date) return;
+        select.innerHTML = '<option value="">Select a time slot</option>';
+        const booked = await fetchBookedTimes(providerId, date);
+        TIMESLOTS.forEach(slot => {
+            const isBooked = booked.includes(slot.value);
+            const option = document.createElement('option');
+            option.value = slot.value;
+            option.textContent = `${slot.label} ${isBooked ? '(Booked)' : '(Available)'}`;
+            if (isBooked) option.disabled = true;
+            select.appendChild(option);
+        });
+    }
+
+    document.getElementById('service-date').addEventListener('change', updateTimeslotDropdown);
+    // Also update timeslots when a provider is selected
+    const origSelectProvider = selectProvider;
+    selectProvider = function(provider) {
+        origSelectProvider(provider, false);
+        // Reset date and timeslot fields
+        document.getElementById('service-date').value = '';
+        updateTimeslotDropdown();
+    };
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        const provider = await fetchProviderDetails();
+        if (provider) {
+            // Update main provider details section
+            document.getElementById('provider-image').src = provider.image || 'images/default-provider.jpg';
+            document.getElementById('provider-name').textContent = provider.name;
+            document.getElementById('provider-rating').innerHTML = `${'★'.repeat(Math.floor(provider.rating))}${'☆'.repeat(5 - Math.floor(provider.rating))} (${provider.reviews} reviews)`;
+            document.getElementById('provider-price').textContent = `Starting from ₹${provider.price}`;
+            document.getElementById('provider-description').textContent = provider.description || '';
+            // Update booking form and map
+            selectProvider(provider, false);
+            // Attach Add to Cart button logic
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            if (addToCartBtn) {
+                addToCartBtn.onclick = function() {
+                    addToCart({
+                        service_id: provider.service_id,
+                        provider_id: provider.id,
+                        name: provider.service_name,
+                        provider_name: provider.name,
+                        price: provider.price,
+                        image: provider.image,
+                        category: provider.category
+                    });
+                };
+            }
+        }
+        // Reviews logic
+        const reviews = await fetchProviderReviews();
+        renderReviews(reviews);
+        // Star input logic
+        let getCurrentRating = renderStarRatingInput();
+        // Show/hide review form logic
+        const showReviewBtn = document.getElementById('show-review-form-btn');
+        const reviewFormContainer = document.getElementById('leave-review-form-container');
+        showReviewBtn.onclick = async function() {
+            // Check login status before showing review form
+            try {
+                const loginRes = await fetch('check_session.php');
+                const loginData = await loginRes.json();
+                if (!loginData.loggedIn) {
+                    alert('You must be logged in to write a review. Redirecting to login page.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+            } catch (err) {
+                alert('Unable to check login status. Please try again.');
+                return;
+            }
+            reviewFormContainer.style.display = 'block';
+            showReviewBtn.style.display = 'none';
+        };
+        // Review form submit
+        document.getElementById('leave-review-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const rating = getCurrentRating();
+            const comment = document.getElementById('review-comment').value.trim();
+            const reviewerName = document.getElementById('reviewer-name').value.trim();
+            if (!reviewerName) {
+                alert('Please enter your name.');
+                return;
+            }
+            if (!rating) {
+                alert('Please select a rating.');
+                return;
+            }
+            // POST review (assume endpoint exists)
+            const res = await fetch('submit_review.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    provider_id: providerId,
+                    service_id: serviceId,
+                    reviewer_name: reviewerName,
+                    rating,
+                    comment
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('review-success').style.display = 'block';
+                document.getElementById('review-comment').value = '';
+                setTimeout(() => { 
+                    document.getElementById('review-success').style.display = 'none';
+                    reviewFormContainer.style.display = 'none';
+                    showReviewBtn.style.display = 'block';
+                }, 1500);
+                // Refresh reviews
+                const newReviews = await fetchProviderReviews();
+                renderReviews(newReviews);
+            } else {
+                alert('Failed to submit review.' + (data.error ? ('\n' + data.error) : ''));
+            }
+        };
+        // Book Now button logic (show overlay)
+        document.getElementById('book-now-btn').onclick = async function() {
+            // Check login status before showing booking form
+            try {
+                const loginRes = await fetch('check_session.php');
+                const loginData = await loginRes.json();
+                if (!loginData.loggedIn) {
+                    if (confirm('You must be logged in to book a service. Do you want to login now?')) {
+                        window.location.href = 'login.html';
+                    }
+                    return;
+                }
+            } catch (err) {
+                alert('Unable to check login status. Please try again.');
+                return;
+            }
+            const bookingForm = document.getElementById('booking-form');
+            if (window.currentProvider) {
+                selectProvider(window.currentProvider);
+            }
+            if (bookingForm) {
+                bookingForm.scrollIntoView({behavior: 'smooth'});
+            }
+        };
+
+        // Set min date for service-date input to today
+        var dateInput = document.getElementById('service-date');
+        if (dateInput) {
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            var minDate = yyyy + '-' + mm + '-' + dd;
+            dateInput.setAttribute('min', minDate);
+        }
+    });
+
+    // Add logic for manual location entry toggle
+    const manualLocationToggle = document.getElementById('manual-location-toggle');
+    const serviceLocationInput = document.getElementById('service-location');
+    if (manualLocationToggle && serviceLocationInput) {
+        manualLocationToggle.addEventListener('change', function() {
+            if (manualLocationToggle.checked) {
+                serviceLocationInput.readOnly = false;
+                serviceLocationInput.placeholder = 'Type your location...';
+            } else {
+                serviceLocationInput.readOnly = true;
+                serviceLocationInput.placeholder = 'Enter your location or use the map';
+            }
+        });
+    }
+
+    // Fetch logged-in user name and autofill reviewer name
+    async function autofillReviewerName() {
+        try {
+            const response = await fetch('check_session.php');
+            const data = await response.json();
+            if (data.loggedIn && data.user && data.user.name) {
+                const reviewerNameInput = document.getElementById('reviewer-name');
+                if (reviewerNameInput) {
+                    reviewerNameInput.value = data.user.name;
+                    reviewerNameInput.readOnly = true;
+                }
+            }
+        } catch (e) {}
+    }
+    document.addEventListener('DOMContentLoaded', autofillReviewerName);
+    </script>
+</body>
+</html>

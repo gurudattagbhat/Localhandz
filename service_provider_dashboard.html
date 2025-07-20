@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Provider Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/analytics.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <style>
+        /* === Light/Dark Theme Variables === */
+        :root {
+            /* Light Theme (Default) */
+            --bg-primary: #f8f9fa;      /* Overall background */
+            --bg-secondary: #ffffff;   /* Card/Navbar background */
+            --text-primary: #212529;   /* Dark text */
+            --text-secondary: #6c757d; /* Medium text */
+            --text-muted: #adb5bd;     /* Light text */
+            --border-color: #dee2e6;   /* Borders */
+            --accent-color: #3498db;   /* Accent Blue */
+            --sidebar-bg: #2c3e50;    /* Dark Blue */
+            --sidebar-text: #ecf0f1;  /* Light Grey */
+            --sidebar-hover-bg: #34495e;
+            --sidebar-active-border: var(--accent-color);
+            --shadow-color: rgba(0, 0, 0, 0.07);
+            --shadow-hover-color: rgba(0, 0, 0, 0.1);
+            --success-bg: #d4edda;
+            --success-text: #155724;
+            --success-border: #c3e6cb;
+            --danger-bg: #f8d7da;
+            --danger-text: #721c24;
+            --danger-border: #f5c6cb;
+        }
+
+        body.dark-mode {
+            /* Dark Theme */
+            --bg-primary: #1a1a1a;      /* Very Dark Grey/Black */
+            --bg-secondary: #2a2a2a;   /* Dark Grey */
+            --text-primary: #e9ecef;   /* Light Grey Text */
+            --text-secondary: #adb5bd; /* Medium Grey Text */
+            --text-muted: #6c757d;     /* Darker Grey Text */
+            --border-color: #495057;   /* Darker Borders */
+            /* Accent color can remain the same or be adjusted */
+            --accent-color: #4dabf7;   /* Lighter Blue */ 
+            --sidebar-bg: #212529;    /* Darker Sidebar */
+            --sidebar-text: #adb5bd;  
+            --sidebar-hover-bg: #343a40;
+            --sidebar-active-border: var(--accent-color);
+            --shadow-color: rgba(255, 255, 255, 0.05);
+            --shadow-hover-color: rgba(255, 255, 255, 0.08);
+            --success-bg: #2a4832;
+            --success-text: #a3e4b6;
+            --success-border: #3d6e4a;
+            --danger-bg: #58272d;
+            --danger-text: #f5c6cb;
+            --danger-border: #a1404b;
+        }
+
+        /* === Base Styles using Variables === */
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling on the entire page */
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            padding-top: 20px;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            padding-top: 0;
+        }
+
+        .sidebar nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar nav ul li {
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar nav ul li:hover {
+            background-color: var(--sidebar-hover-bg);
+            border-left-color: var(--sidebar-active-border);
+        }
+
+        .sidebar nav ul li a {
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .main-content.collapsed {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        /* === Navbar Layout (Logo Left) === */
+        .navbar {
+            background-color: #34495e !important;
+            color: #fff !important;
+            padding: 0 30px; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; 
+            top: 0;
+            z-index: 1050;
+            width: 100%;
+            box-sizing: border-box;
+            height: 70px;
+            min-height: 70px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .navbar.collapsed {
+            width: 100%;
+        }
+        .navbar-left {
+            flex: 0 1 auto;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .navbar-left .logo img {
+            height: 45px;
+            max-height: 45px;
+            width: auto;
+            display: block;
+            vertical-align: middle;
+            object-fit: contain;
+        }
+        .navbar-left .toggle-btn {
+            color: #fff !important; 
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            position: relative;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar-left .toggle-btn i {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-left .toggle-btn:hover i {
+            transform: scale(1.1);
+        }
+
+        .navbar-left .toggle-btn:active i {
+            transform: scale(0.95);
+        }
+        .navbar-right {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            position: relative;
+            gap: 15px; /* Add gap to space out toggle and profile */
+        }
+        /* === End Navbar Layout === */
+
+        .navbar .profile-icon {
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 30px;
+            background-color: var(--bg-secondary);
+            border-radius: 5px;
+            width: 200px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            overflow-y: auto; /* Enable scrolling for dropdown content */
+            max-height: 300px; /* Limit dropdown height */
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown .profile-info {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .profile-dropdown .profile-info img {
+            height: 60px;
+            width: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .profile-dropdown .profile-info h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .profile-dropdown .profile-info p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .profile-dropdown a {
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .profile-dropdown a:hover {
+            background-color: var(--bg-primary);
+            color: var(--accent-color);
+        }
+
+        .dashboard-stats,
+        .manage-services,
+        .orders-section,
+        .analytics-section,
+        .edit-profile-section {
+            display: none;
+        }
+
+        .active-section {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 25px;
+            display: none;
+        }
+
+        .dashboard-grid.active-section {
+            display: grid;
+        }
+
+        .stat-card {
+            background-color: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 3px 8px var(--shadow-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 12px var(--shadow-hover-color);
+        }
+
+        .stat-card.welcome-card {
+            border-left-color: #2ecc71;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 28px;
+            color: var(--accent-color);
+            background-color: rgba(52, 152, 219, 0.1);
+            padding: 12px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stat-card.welcome-card .stat-icon {
+            color: #2ecc71;
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+
+        .stat-card .stat-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-card .stat-info p {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .recent-orders-card {
+            background-color: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px var(--shadow-color);
+            grid-column: span 2;
+            border-top: 3px solid var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .recent-orders-card {
+                grid-column: span 1;
+            }
+        }
+
+        .recent-orders-card h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .recent-orders-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .recent-orders-card li {
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .recent-orders-card li:last-child {
+            border-bottom: none;
+        }
+
+        .dashboard-button {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 500;
+            font-size: 13px;
+            float: right;
+        }
+
+        .dashboard-button:hover {
+            background-color: #2980b9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        .photo-preview {
+            max-width: 100px;
+            margin-top: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .manage-services h2 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .manage-services form {
+            overflow-y: auto;
+            max-height: 70vh;
+            padding: 20px;
+            background-color: var(--bg-primary);
+            border-radius: 5px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            margin-top: 20px;
+        }
+
+        .manage-services form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .manage-services form input,
+        .manage-services form textarea,
+        .manage-services form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .manage-services form button {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .manage-services form button:hover {
+            background-color: #2980b9;
+        }
+
+        .orders-section .table-container {
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .analytics-section {
+            padding: 20px;
+        }
+
+        .simple-analytics-card {
+            background-color: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px var(--shadow-color);
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .simple-analytics-card h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .simple-analytics-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .edit-profile-section {
+            padding: 25px;
+            background-color: var(--bg-primary);
+            border-radius: 8px;
+            display: none;
+        }
+        .edit-profile-section.active-section {
+            display: block;
+        }
+        .edit-profile-section h2 {
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        #editProfileForm {
+            background-color: var(--bg-secondary);
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            max-width: 750px;
+            margin: 20px auto;
+        }
+
+        #editProfileForm label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        #editProfileForm input[type="text"],
+        #editProfileForm input[type="email"],
+        #editProfileForm input[type="tel"],
+        #editProfileForm input[type="password"],
+        #editProfileForm select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #editProfileForm input:focus,
+        #editProfileForm select:focus {
+            border-color: var(--accent-color);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(var(--accent-rgb, 52, 152, 219), 0.25);
+        }
+        
+        #editProfileForm input[type="file"] {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        
+        #editProfileForm .photo-preview {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 5px auto 25px auto;
+            border: 4px solid var(--border-color);
+        }
+        
+        #editProfileForm button[type="submit"] {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-size: 16px;
+            font-weight: bold;
+            display: block;
+            width: auto;
+            min-width: 150px;
+            margin: 20px auto 0 auto;
+            text-align: center;
+        }
+        #editProfileForm button[type="submit"]:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+        #editProfileForm button[type="submit"]:active {
+            transform: translateY(0px);
+        }
+
+        #edit-profile-messages {
+            max-width: 750px;
+            margin: 0 auto 20px auto;
+        }
+        #edit-profile-messages .alert {
+            padding: 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 15px;
+        }
+        #edit-profile-messages .alert-success {
+            color: var(--success-text);
+            background-color: var(--success-bg);
+            border-color: var(--success-border);
+        }
+        #edit-profile-messages .alert-danger {
+            color: var(--danger-text);
+            background-color: var(--danger-bg);
+            border-color: var(--danger-border);
+        }
+
+        .profile-view-section {
+            padding: 20px;
+            background-color: var(--bg-primary);
+            border-radius: 8px;
+            display: none;
+        }
+        .profile-view-section h2 {
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .profile-card {
+            background-color: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .profile-photo-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .profile-details p {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .profile-details .label {
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 130px;
+            display: inline-block;
+        }
+        #go-to-edit-profile-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        #go-to-edit-profile-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .profile-view-section.active-section {
+            display: block;
+        }
+
+        .navbar-right .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+        }
+        .navbar-right .profile-trigger:hover {
+            background-color: transparent !important; 
+        }
+
+        .navbar-right .profile-trigger .navbar-profile-pic {
+            height: 40px;
+            width: 40px;
+            min-width: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #fff !important; /* Adjust border if needed */
+            display: block;
+            position: static;
+        }
+        .navbar-right .profile-trigger .navbar-text {
+            color: #fff !important; 
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--bg-secondary);
+            border-radius: 5px;
+            width: 180px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            z-index: 1000;
+            margin-top: 5px;
+        }
+        .profile-dropdown.show {
+            display: block;
+        }
+        .profile-dropdown a {
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+        .profile-dropdown a:hover {
+            background-color: var(--bg-primary);
+            color: var(--accent-color);
+        }
+
+        /* Add this to your CSS section */
+        .btn-refresh {
+            background: transparent;
+            border: none;
+            color: #4a90e2;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 5px;
+            margin-left: 5px;
+        }
+        .btn-refresh:hover {
+            color: #2a70c2;
+        }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+            vertical-align: middle;
+            margin-right: 16px;
+        }
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .slider-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #fff;
+            z-index: 1;
+        }
+        .slider-icon.sun {
+            left: 5px;
+        }
+        .slider-icon.moon {
+            right: 5px;
+            color: #eee;
+        }
+        body.dark-mode .slider {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <nav>
+            <ul>
+                <li id="dashboard-menu"><a href="#dashboard">Dashboard</a></li>
+                <li id="services-menu"><a href="#services">Manage Services</a></li>
+                <li id="orders-menu"><a href="#orders">Orders</a></li>
+                <li id="analytics-menu"><a href="#analytics">Analytics</a></li>
+                <li id="logout-menu"><a href="#">Logout</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <header>
+            <div class="navbar">
+                <div class="navbar-left">
+                    <button class="toggle-btn" id="toggle-btn"><i class="fas fa-bars"></i></button>
+                    <div class="logo">
+                    <img src="images/Logomain.jpg" alt="Local Handz Logo">
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <!-- Classic Theme Toggle Switch -->
+                    <label class="theme-switch" for="theme-checkbox" title="Toggle theme">
+                        <input type="checkbox" id="theme-checkbox" />
+                        <div class="slider round">
+                            <i class="fas fa-sun slider-icon sun"></i>
+                            <i class="fas fa-moon slider-icon moon"></i>
+                        </div>
+                    </label>
+                    <!-- End Theme Toggle Switch -->
+                    <div class="profile-trigger" id="profile-trigger"> 
+                        <img id="navbar-profile-img" src="images/default-profile.png" alt="Profile" class="navbar-profile-pic">
+                        <span id="navbar-profile-name" class="navbar-text">Provider Name</span> 
+                    </div>
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <a href="#" id="view-profile-link">View Profile</a>
+                        <a href="#" id="edit-profile-link">Edit Profile</a>
+                        <a href="logout.php" id="logout-link">Log out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="dashboard-grid active-section">
+            <!-- Stat Cards -->
+            <div class="stat-card welcome-card">
+                <i class="fas fa-handshake stat-icon"></i>
+                <div class="stat-info">
+                    <h3>Welcome,</h3>
+                    <p id="user-name">Service Provider</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                 <i class="fas fa-tools stat-icon"></i>
+                 <div class="stat-details">
+                    <h3>Total Services</h3>
+                    <p id="total-services">0</p>
+                    <button onclick="updateServiceCount()" class="btn-sm btn-refresh" title="Refresh service count">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                 </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-box-open stat-icon"></i>
+                <div class="stat-info">
+                    <h3>Total Orders</h3>
+                    <p id="total-orders">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-rupee-sign stat-icon"></i>
+                <div class="stat-info">
+                    <span id="dashboard-total-earning">0</span><br>
+                    <span class="stat-label">Total Earning</span>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="recent-orders-card">
+                 <h2>Recent Orders</h2>
+                 <ul id="recent-orders-list">
+                     <li>No recent orders found.</li> 
+                 </ul>
+                 <button id="view-all-orders-btn" class="dashboard-button">View All Orders</button>
+            </div>
+
+            <!-- Analytics Summary Card -->
+            <div class="analytics-summary-card">
+                 <h2>Quick Analytics</h2>
+                 <div class="analytics-item">
+                     <span class="analytics-label">Completion Rate:</span>
+                     <span id="analytics-completion-rate" class="analytics-value">--%</span>
+                 </div>
+                 <div class="analytics-item">
+                     <span class="analytics-label">Most Popular:</span>
+                     <span id="analytics-popular-service" class="analytics-value">N/A</span>
+                 </div>
+                 <!-- <button id="go-to-analytics-btn" class="dashboard-button">Full Analytics</button> -->
+            </div>
+            
+        </div>
+
+        <!-- Manage Services Section -->
+        <div id="services" class="manage-services">
+            <h2>Manage Services</h2>
+            <div id="services-messages"></div>
+
+            <!-- Table to display existing services -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service ID</th>
+                            <th>Service Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Description</th>
+                            <th>Photo</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="services-table-body">
+                        <!-- Dynamic rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Form to add or edit a service -->
+            <form id="serviceForm" enctype="multipart/form-data">
+                <h3 id="form-title">Add New Service</h3>
+                <input type="hidden" id="service-id" name="id">
+
+                <label for="service-name">Service Name</label>
+                <input type="text" id="service-name" name="name" placeholder="Enter service name" required>
+
+                <label for="service-category">Category</label>
+                <input type="text" id="service-category" name="category" placeholder="Enter service category" required>
+
+                <label for="service-price">Price</label>
+                <input type="number" id="service-price" name="price" placeholder="Enter service price" required>
+
+                <label for="service-description">Description</label>
+                <textarea id="service-description" name="description" placeholder="Enter service description" rows="4" required></textarea>
+
+                <label for="service-photo">Upload Photo</label>
+                <input type="file" id="service-photo" name="photo" accept="image/*">
+                <img id="service-photo-preview" class="photo-preview" src="#" alt="Photo Preview" style="display: none;">
+
+                <button type="submit" id="save-service-btn">Save Service</button>
+                <button type="button" id="cancel-edit-btn" style="display: none;">Cancel</button>
+            </form>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders" class="orders-section">
+            <h2>Orders</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Service</th>
+                            <th>Service Location</th>
+                            <th>Status</th>
+                            <th>Booking Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- Dynamic rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics Section (NEW, SIMPLE) -->
+        <div id="analytics" class="analytics-section">
+            <h2>Analytics Overview</h2>
+            <div id="simple-analytics-cards" style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                <div class="simple-analytics-card">
+                    <h3>Total Revenue</h3>
+                    <div class="simple-analytics-value" id="sa-total-revenue">--</div>
+                </div>
+                <div class="simple-analytics-card">
+                    <h3>Total Orders</h3>
+                    <div class="simple-analytics-value" id="sa-total-orders">--</div>
+                </div>
+                <div class="simple-analytics-card">
+                    <h3>Average Rating</h3>
+                    <div class="simple-analytics-value" id="sa-avg-rating">--</div>
+                </div>
+                <div class="simple-analytics-card">
+                    <h3>Most Popular Service</h3>
+                    <div class="simple-analytics-value" id="sa-popular-service">--</div>
+                </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
+                <div style="flex:1; min-width:300px; height:300px;">
+                    <h4 style="margin-bottom:0.5rem;">Revenue Trend (Last 6 Months)</h4>
+                    <canvas id="revenueTrendChart" height="250"></canvas>
+                </div>
+                <div style="flex:1; min-width:250px; height:300px;">
+                    <h4 style="margin-bottom:0.5rem;">Order Status Distribution</h4>
+                    <canvas id="orderStatusChart" height="250"></canvas>
+                </div>
+                <div style="flex:1; min-width:250px; height:300px;">
+                    <h4 style="margin-bottom:0.5rem;">Service Popularity</h4>
+                    <canvas id="servicePopularityChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Section -->
+        <div id="edit-profile" class="edit-profile-section">
+            <h2>Edit Profile</h2>
+            <div id="edit-profile-messages"></div>
+
+            <form id="editProfileForm" enctype="multipart/form-data">
+                <label for="edit-name">Full Name</label>
+                <input type="text" id="edit-name" name="name" placeholder="Enter your full name" required>
+
+                <label for="edit-email">Email</label>
+                <input type="email" id="edit-email" name="email" placeholder="Enter your email" required>
+
+                <label for="edit-phone">Phone Number</label>
+                <input type="tel" id="edit-phone" name="phone" placeholder="Enter your phone number" required>
+
+                <label for="edit-service">Service Type</label>
+                <select id="edit-service" name="service" required>
+                    <option value="">Select a service</option>
+                    <option value="ac-repair">AC & Appliance Repair</option>
+                    <option value="cleaning">Cleaning</option>
+                    <option value="electrician">Electrician</option>
+                    <option value="plumber">Plumber</option>
+                    <option value="carpenter">Carpenter</option>
+                    <option value="water-purifier">Native Water Purifier</option>
+                    <option value="painter">Painting & Waterproofing</option>
+                    <option value="wall-panels">Wall Panels</option>
+                    <option value="gardening">Gardening Services</option>
+                    <option value="home-security">Home Security</option>
+                    <option value="pest-control">Pest Control</option>
+                    <option value="moving-services">Moving Services</option>
+                </select>
+
+                <label for="edit-area">Area of Service</label>
+                <input type="text" id="edit-area" name="area" placeholder="Enter the area or city of service" required>
+
+                <label for="edit-photo">Upload Photo</label>
+                <input type="file" id="edit-photo" name="photo" accept="image/*">
+                <img id="edit-photo-preview" class="photo-preview" src="#" alt="Photo Preview" style="display: none;">
+
+                <label for="edit-password">New Password</label>
+                <input type="password" id="edit-password" name="password" placeholder="Enter a new password (optional)">
+
+                <label for="edit-security-question">Security Question</label>
+                <select id="edit-security-question" name="security-question" required>
+                    <option value="">Select a security question</option>
+                    <option value="pet">What is the name of your first pet?</option>
+                    <option value="school">What is the name of your first school?</option>
+                    <option value="city">In which city were you born?</option>
+                    <option value="nickname">What was your childhood nickname?</option>
+                </select>
+
+                <label for="edit-security-answer">Answer</label>
+                <input type="text" id="edit-security-answer" name="security-answer" placeholder="Enter your answer" required>
+
+                <button type="submit">Update Profile</button>
+            </form>
+        </div>
+
+        <!-- View Profile Section -->
+        <div id="view-profile" class="profile-view-section">
+            <h2>Profile Details</h2>
+            <div class="profile-card">
+                <img id="view-profile-photo" src="images/default-profile.png" alt="Profile Photo" class="profile-photo-large">
+                <div class="profile-details">
+                    <p><strong class="label">Name:</strong> <span id="view-profile-name"></span></p>
+                    <p><strong class="label">Email:</strong> <span id="view-profile-email"></span></p>
+                    <p><strong class="label">Phone:</strong> <span id="view-profile-phone"></span></p>
+                    <p><strong class="label">Service Type:</strong> <span id="view-profile-service"></span></p>
+                    <p><strong class="label">Area of Service:</strong> <span id="view-profile-area"></span></p>
+                    <button id="go-to-edit-profile-btn">Edit Profile</button>
+                </div>
+            </div>
+        </div>
+        <!-- End View Profile Section -->
+
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // === Theme Toggle Logic ===
+        const themeToggle = document.getElementById('theme-checkbox');
+        const currentTheme = localStorage.getItem('theme');
+
+        // Apply saved theme on initial load
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            if (themeToggle) themeToggle.checked = true;
+        }
+
+        if (themeToggle) {
+             themeToggle.addEventListener('change', function() {
+                 if (this.checked) {
+                     document.body.classList.add('dark-mode');
+                     localStorage.setItem('theme', 'dark');
+                 } else {
+                     document.body.classList.remove('dark-mode');
+                     localStorage.setItem('theme', 'light');
+                 }
+             });
+        }
+        // === End Theme Toggle Logic ===
+
+        // Sidebar toggle functionality
+        document.getElementById('toggle-btn').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('collapsed');
+        });
+
+        // ---> Variable to store fetched user data <--- 
+        let currentUserData = null;
+
+        // Track if provider data is loaded
+        let providerDataLoaded = false;
+
+        // --- Restore Profile dropdown functionality, triggered by profile-trigger ---
+        const profileTrigger = document.getElementById('profile-trigger');
+        const profileDropdown = document.getElementById('profile-dropdown');
+
+        if (profileTrigger && profileDropdown) { // Check elements exist
+            profileTrigger.addEventListener('click', function () {
+            profileDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', function (event) {
+                // Check if the click is outside the trigger AND outside the dropdown itself
+                if (!profileTrigger.contains(event.target) && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+        }
+       // --- END Restore BLOCK ---
+
+        // --- Restore Dropdown Link Listeners ---
+        const viewProfileLink = document.getElementById('view-profile-link');
+        if (viewProfileLink) {
+             viewProfileLink.addEventListener('click', function (e) {
+            e.preventDefault(); // Prevent default link behavior
+                 profileDropdown.classList.remove('show'); // Close dropdown
+
+                 if (currentUserData) { // Check if data is available
+                     // Populate the view profile section
+                     document.getElementById('view-profile-name').textContent = currentUserData.name || 'N/A';
+                     document.getElementById('view-profile-email').textContent = currentUserData.email || 'N/A';
+                     document.getElementById('view-profile-phone').textContent = currentUserData.phone || 'N/A';
+                     document.getElementById('view-profile-service').textContent = currentUserData.service || 'N/A';
+                     document.getElementById('view-profile-area').textContent = currentUserData.area || 'N/A';
+                     
+                     // Set photo using the same logic as navbar
+                     const photoElement = document.getElementById('view-profile-photo');
+                     if (photoElement) {
+                         let photoPath = 'images/default-profile.png'; // Default path
+                         if (currentUserData.photo) { 
+                             if (!currentUserData.photo.startsWith('uploads/') && !currentUserData.photo.startsWith('images/')) {
+                                 photoPath = 'uploads/' + currentUserData.photo;
+                             } else {
+                                 photoPath = currentUserData.photo; 
+                             }
+                         }
+                         photoElement.src = photoPath;
+                     }
+
+                     // Switch active sections
+                     const sections = document.querySelectorAll('.main-content > div:not(.navbar)'); // Exclude navbar
+            sections.forEach(section => section.classList.remove('active-section'));
+                     const targetSection = document.getElementById('view-profile');
+                     if (targetSection) {
+                         targetSection.classList.add('active-section');
+                     }
+                 } else {
+                     console.error('Cannot view profile - user data not loaded yet.');
+                     // Optionally, display an error message to the user
+                     alert('Profile data not loaded yet. Please wait a moment and try again.');
+                 }
+             });
+        }
+        
+        const editProfileLink = document.getElementById('edit-profile-link');
+        if(editProfileLink) {
+            editProfileLink.addEventListener('click', function (e) {
+                e.preventDefault(); 
+            const sections = document.querySelectorAll('.main-content > div');
+            sections.forEach(section => section.classList.remove('active-section'));
+            document.getElementById('edit-profile').classList.add('active-section');
+                profileDropdown.classList.remove('show'); // Close dropdown
+            });
+        }
+
+        // Handle "Logout" link (original dropdown version)
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+             logoutLink.addEventListener('click', async function (e) {
+            e.preventDefault(); // Prevent default link behavior
+            try {
+                const response = await fetch('logout.php');
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        });
+        }
+        // ---> Remove listener for direct navbar logout link <---
+        /*
+        const navbarLogoutLink = document.getElementById('navbar-logout-link');
+        if (navbarLogoutLink) {
+            navbarLogoutLink.addEventListener('click', async function (e) {
+               ...
+            });
+        }
+        */
+        // --- END Restore Dropdown Link Listeners ---
+
+        // Make dashboard stat cards clickable to navigate to relevant sections
+        const statCards = document.querySelectorAll('.dashboard-grid .stat-card');
+        statCards.forEach((card, idx) => {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', function() {
+                let targetSection = null;
+                switch(idx) {
+                    case 1: // Total Services
+                        targetSection = document.getElementById('services');
+                        break;
+                    case 2: // Total Orders
+                        targetSection = document.getElementById('orders');
+                        break;
+                    case 3: // Total Earning
+                        targetSection = document.getElementById('analytics');
+                        break;
+                    default:
+                        return; // Welcome card or unknown
+                }
+                if (targetSection) {
+                    document.querySelectorAll('.main-content > div').forEach(section => section.classList.remove('active-section'));
+                    targetSection.classList.add('active-section');
+                }
+            });
+        });
+
+        // Sidebar menu item click functionality
+        document.querySelectorAll('.sidebar nav ul li a').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const sections = document.querySelectorAll('.main-content > div');
+                sections.forEach(section => section.classList.remove('active-section'));
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active-section');
+                }
+            });
+        });
+
+        // Menubar Logout (sidebar)
+        document.getElementById('logout-menu').addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('logout.php');
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Fetch full user data on page load for Navbar Trigger and Edit Form
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                const response = await fetch('service_provider_actions.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'fetchDetails' }),
+                });
+
+                if (!response.ok) {
+                    console.error('Fetch details failed, status:', response.status);
+                    window.location.href = 'login.html'; 
+                    return; 
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // ---> Store fetched data for later use <--- 
+                    currentUserData = data.user;
+                    providerDataLoaded = true;
+
+                    // --- Populate Navbar Trigger Elements --- 
+                    const navbarName = document.getElementById('navbar-profile-name');
+                    if (navbarName) navbarName.textContent = currentUserData.name;
+                    const welcomeName = document.getElementById('user-name'); 
+                    if (welcomeName) welcomeName.textContent = currentUserData.name;
+                    
+                    const navbarImg = document.getElementById('navbar-profile-img');
+                    if (navbarImg) {
+                        let photoPath = 'images/default-profile.png'; 
+                        if (currentUserData.photo) {
+                            if (!currentUserData.photo.startsWith('uploads/') && !currentUserData.photo.startsWith('images/')) {
+                                photoPath = 'uploads/' + currentUserData.photo;
+                } else {
+                                photoPath = currentUserData.photo; 
+                            }
+                        }
+                        navbarImg.src = photoPath;
+                        console.log('(fetchDetails) Setting navbar profile image src to:', navbarImg.src);
+                    }
+                    
+                    // --- Populate Edit Profile Form --- 
+                    document.getElementById('edit-name').value = currentUserData.name;
+                    document.getElementById('edit-email').value = currentUserData.email;
+                    document.getElementById('edit-phone').value = currentUserData.phone;
+                    document.getElementById('edit-service').value = currentUserData.service;
+                    document.getElementById('edit-area').value = currentUserData.area;
+ 
+                    const editPhotoPreview = document.getElementById('edit-photo-preview');
+                    if (editPhotoPreview) {
+                        const editPhotoPath = navbarImg ? navbarImg.src : 'images/default-profile.png'; 
+                         if (editPhotoPath !== 'images/default-profile.png') { 
+                             editPhotoPreview.src = editPhotoPath;
+                             editPhotoPreview.style.display = 'block';
+                         } else {
+                             editPhotoPreview.style.display = 'none';
+                         }
+                    }
+ 
+                    document.getElementById('edit-security-question').value = currentUserData.security_question;
+                    document.getElementById('edit-security-answer').value = currentUserData.security_answer;
+                   
+                } else {
+                 console.error('Failed to fetch profile details (API Error):', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching profile details (Catch Block):', error);
+            }
+            
+            // --- Fetch Dashboard Stats AND Recent Orders --- 
+            try {
+                 const statsResponse = await fetch('service_provider_dashboard.php'); 
+                 
+                 if (!statsResponse.ok) {
+                     console.error('Fetch dashboard data failed, status:', statsResponse.status);
+                     // ... (error handling for stats) ...
+                     return; 
+                 }
+                 
+                 const dashboardData = await statsResponse.json(); 
+                 
+                 // Populate Stats
+                 if (dashboardData && dashboardData.stats) { 
+                      // ... (populate stats elements) ...
+                 } else {
+                      // ... (handle missing stats) ...
+                 }
+                 
+                 // ---> Populate Recent Orders List <--- 
+                 const recentOrdersList = document.getElementById('recent-orders-list');
+                 if (recentOrdersList && dashboardData && dashboardData.orders && dashboardData.orders.length > 0) {
+                     recentOrdersList.innerHTML = ''; // Clear default message
+                     const recentOrders = dashboardData.orders.slice(0, 3); // Show latest 3
+                     recentOrders.forEach(order => {
+                         const li = document.createElement('li');
+                         li.textContent = `Order #${order.order_id || '?'}: ${order.service_name || 'Service'} for ${order.customer_name || 'Customer'} (${order.status || 'status?'})`;
+                         recentOrdersList.appendChild(li);
+                     });
+                 } else if (recentOrdersList) {
+                      recentOrdersList.innerHTML = '<li>No recent orders found.</li>'; 
+                 }
+                 
+                 // ---> Populate Analytics <--- 
+                 if (dashboardData && dashboardData.analytics) {
+                     document.getElementById('analytics-completion-rate').textContent = (dashboardData.analytics.completionRate !== null ? dashboardData.analytics.completionRate : '0') + '%';
+                     document.getElementById('analytics-popular-service').textContent = dashboardData.analytics.popularService || 'N/A';
+                } else {
+                     console.error('Dashboard analytics data missing:', dashboardData);
+                     document.getElementById('analytics-completion-rate').textContent = 'N/A';
+                     document.getElementById('analytics-popular-service').textContent = 'N/A';
+                }
+
+                 // --- Calculate and show total earning ---
+                 let totalEarning = 0;
+                 if (dashboardData && dashboardData.orders && Array.isArray(dashboardData.orders)) {
+                     dashboardData.orders.forEach(order => {
+                         if (order.status && order.status.toLowerCase() === 'completed' && order.price) {
+                             totalEarning += parseFloat(order.price);
+                         }
+                     });
+                 }
+                 document.getElementById('dashboard-total-earning').textContent = '₹' + totalEarning.toFixed(2);
+                 
+            } catch (error) {
+                 console.error('Error fetching/parsing dashboard data (Stats/Orders/Analytics):', error);
+                 // ... (existing error handling for stats/orders) ...
+                 document.getElementById('analytics-completion-rate').textContent = 'Err';
+                 document.getElementById('analytics-popular-service').textContent = 'Err';
+                 document.getElementById('dashboard-total-earning').textContent = 'Err';
+            }
+            
+        }); // End of DOMContentLoaded Listener
+        
+        // ---> Add Listener for View All Orders Button <--- 
+        const viewAllOrdersBtn = document.getElementById('view-all-orders-btn');
+        if(viewAllOrdersBtn) {
+            viewAllOrdersBtn.addEventListener('click', () => {
+                 const sections = document.querySelectorAll('.main-content > div:not(.navbar)'); 
+                 sections.forEach(section => section.classList.remove('active-section'));
+                 document.getElementById('orders').classList.add('active-section'); // Navigate to #orders
+            });
+        }
+
+        // ---> Remove listener for non-existent analytics button <---
+        /*
+        const goToAnalyticsBtn = document.getElementById('go-to-analytics-btn');
+        if(goToAnalyticsBtn) {
+             // ... listener ...
+        }
+        */
+
+        // ---> Add listener for Edit Profile photo input change <--- 
+        const editPhotoInput = document.getElementById('edit-photo');
+        const editPhotoPreviewEl = document.getElementById('edit-photo-preview');
+
+        if (editPhotoInput && editPhotoPreviewEl) {
+            editPhotoInput.addEventListener('change', function(event) {
+                const file = event.target.files[0]; // Get the selected file
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        // Set the src of the preview image to the Data URL
+                        editPhotoPreviewEl.src = e.target.result;
+                        // Make the preview visible
+                        editPhotoPreviewEl.style.display = 'block';
+                    }
+                    
+                    // Read the file as a Data URL
+                    reader.readAsDataURL(file);
+                } else {
+                     // Optional: Handle case where user cancels file selection
+                     // Maybe hide preview or reset to original if desired
+                     // editPhotoPreviewEl.style.display = 'none'; 
+                     // editPhotoPreviewEl.src = currentUserData ? (currentUserData.photo || 'images/default-profile.png') : 'images/default-profile.png'; // Reset to original
+                }
+            });
+        }
+
+        // Handle profile update form submission
+        document.getElementById('editProfileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            formData.append('action', 'updateProfile');
+
+            try {
+                const response = await fetch('service_provider_actions.php', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('edit-profile-messages').innerHTML = `
+                        <div class="alert alert-success">${data.message}</div>
+                    `;
+                } else {
+                    document.getElementById('edit-profile-messages').innerHTML = `
+                        <div class="alert alert-danger">${data.error}</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+            }
+        });
+
+        // Fetch and display services
+        async function fetchServices() {
+            try {
+                const response = await fetch('manage_services.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'fetchServices' }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const servicesTableBody = document.getElementById('services-table-body');
+                    servicesTableBody.innerHTML = ''; // Clear existing rows
+
+                    // Update the total services count based on the actual number of services
+                    if (data.services && Array.isArray(data.services)) {
+                        // Set the count directly based on the number of services returned
+                        const totalServicesCount = data.services.length;
+                        
+                        // Update both in the services management page and in the dashboard
+                        const totalServicesElements = document.querySelectorAll('#total-services, .total-services');
+                        totalServicesElements.forEach(element => {
+                            if (element) element.textContent = totalServicesCount;
+                        });
+                        
+                        // Also log it to ensure it's being updated
+                        console.log('Setting total services count to:', totalServicesCount);
+                    }
+
+                    data.services.forEach(service => {
+                        const row = document.createElement('tr');
+                        // ---> Handle potentially missing photo/description <---
+                        const photoSrc = service.photo ? service.photo : 'images/default-service.png'; // Use a default image if photo is null/empty
+                        const descriptionText = service.description ? service.description : ''; // Use empty string if description is null/empty
+                        
+                        row.innerHTML = `
+                            <td>${service.id}</td>
+                            <td>${service.name}</td>
+                            <td>${service.category}</td>
+                            <td>₹${service.price}</td>
+                            <td>${descriptionText}</td> 
+                            <td><img src="${photoSrc}" alt="${service.name || 'Service'} Photo" class="photo-preview"></td>
+                            <td>
+                                <button class="edit-service-btn service-action-btn" data-id="${service.id}">Edit</button>
+                                <button class="remove-service-btn service-action-btn" data-id="${service.id}">Remove</button>
+                            </td>
+                        `;
+                        servicesTableBody.appendChild(row);
+                    });
+
+                    // Add event listeners to edit and remove buttons
+                    document.querySelectorAll('.edit-service-btn').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const serviceId = this.getAttribute('data-id');
+                            editService(serviceId);
+                        });
+                    });
+
+                    document.querySelectorAll('.remove-service-btn').forEach(button => {
+                        button.addEventListener('click', async function () {
+                            const serviceId = this.getAttribute('data-id');
+                            await removeService(serviceId);
+                        });
+                    });
+                } else {
+                    console.error('Failed to fetch services:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching services:', error);
+            }
+        }
+
+        // Add or update a service
+        document.getElementById('serviceForm').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Prevent the default form submission behavior
+
+            const formData = new FormData(this);
+            const serviceId = document.getElementById('service-id').value;
+
+            // Explicitly set the correct action based on whether serviceId exists
+            const action = serviceId ? 'updateService' : 'addService';
+            formData.set('action', action); // Use set to ensure correct action is present
+
+            try {
+                // Use the explicitly defined targetUrl
+                const response = await fetch('manage_services.php', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Check if response is ok (status 200-299)
+                 if (!response.ok) {
+                    // Try to get text response for non-JSON errors (like server errors)
+                    const errorText = await response.text();
+                    throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Use a less intrusive notification if possible
+                    displayMessage('services-messages', data.message || 'Service saved successfully.', 'success');
+                    fetchServices(); // Refresh the services list
+                    resetServiceForm(); // Clear and reset the form
+                    
+                    // Update the service count on the dashboard directly
+                    updateServiceCount();
+                } else {
+                    // Display the specific error from the server
+                    displayMessage('services-messages', data.error || 'An unknown error occurred.', 'danger');
+                    console.error('Failed to save service:', data.error || 'No error message provided.');
+                }
+            } catch (error) {
+                 console.error('Error submitting service form:', error);
+                 // Display a generic error message, guide user to check console
+                 displayMessage('services-messages', `An unexpected error occurred: ${error.message}. Please check the console for details.`, 'danger');
+            }
+        });
+
+        // Helper function to display messages
+        function displayMessage(elementId, message, type) {
+             const messageDiv = document.getElementById(elementId);
+             if (messageDiv) {
+                 messageDiv.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : 'danger'}">${message}</div>`;
+                 // Optional: auto-clear message after a few seconds
+                 setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
+             }
+        }
+
+        // Helper function to reset the form (assuming you have this already)
+        function resetServiceForm() {
+            const form = document.getElementById('serviceForm');
+            if(form) form.reset();
+            const serviceIdInput = document.getElementById('service-id');
+            if(serviceIdInput) serviceIdInput.value = '';
+            const formTitle = document.getElementById('form-title');
+            if(formTitle) formTitle.textContent = 'Add New Service';
+            const saveBtn = document.getElementById('save-service-btn');
+             if(saveBtn) saveBtn.textContent = 'Save Service';
+            const cancelBtn = document.getElementById('cancel-edit-btn');
+             if(cancelBtn) cancelBtn.style.display = 'none';
+            const photoPreview = document.getElementById('service-photo-preview');
+             if(photoPreview) {
+                 photoPreview.style.display = 'none';
+                 photoPreview.src = '#'; // Clear preview source
+             }
+        }
+
+        // Make sure fetchServices is called on load
+         document.addEventListener('DOMContentLoaded', fetchServices);
+        // Add cancel button listener if not already present
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        if(cancelBtn) cancelBtn.addEventListener('click', resetServiceForm);
+
+        // Edit a service
+        async function editService(serviceId) {
+            try {
+                const response = await fetch('manage_services.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'fetchServiceById', id: serviceId }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const service = data.service;
+                    document.getElementById('service-id').value = service.id;
+                    document.getElementById('service-name').value = service.name;
+                    document.getElementById('service-category').value = service.category;
+                    document.getElementById('service-price').value = service.price;
+                    document.getElementById('service-description').value = service.description;
+
+                    if (service.photo) {
+                        const photoPreview = document.getElementById('service-photo-preview');
+                        photoPreview.src = service.photo;
+                        photoPreview.style.display = 'block';
+                    }
+
+                    document.getElementById('form-title').textContent = 'Edit Service';
+                    document.getElementById('save-service-btn').textContent = 'Update Service';
+                    document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+                } else {
+                    console.error('Failed to fetch service details:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching service details:', error);
+            }
+        }
+
+        // Remove a service
+        async function removeService(serviceId) {
+            try {
+                const response = await fetch('manage_services.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'removeService', id: serviceId }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayMessage('services-messages', data.message || 'Service removed successfully.', 'success');
+                    fetchServices(); // Refresh the services list
+                    
+                    // Update the service count on the dashboard directly
+                    updateServiceCount();
+                } else {
+                    displayMessage('services-messages', data.error || 'An unknown error occurred.', 'danger');
+                }
+            } catch (error) {
+                console.error('Error removing service:', error);
+                displayMessage('services-messages', 'An error occurred while removing the service', 'danger');
+            }
+        }
+        
+        // Initialize charts when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all charts only
+            initializeCharts();
+            // DO NOT load analytics data here
+            
+            // Initialize service count
+            fetchServices();
+        });
+
+        function setupEventListeners() {
+            // Service form submission
+            const serviceForm = document.getElementById('serviceForm');
+            if (serviceForm) {
+                serviceForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    try {
+                        const formData = new FormData(serviceForm);
+                        const response = await fetch('api/services.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const result = await response.json();
+                        if (result.success) {
+                            alert('Service added successfully!');
+                            serviceForm.reset();
+                            loadDashboardData(); // Refresh the dashboard
+                        } else {
+                            throw new Error(result.message || 'Failed to add service');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error adding service: ' + error.message);
+                    }
+                });
+            }
+
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('click', function() {
+                    document.body.classList.toggle('dark-mode');
+                    // Save preference to localStorage
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    localStorage.setItem('darkMode', isDarkMode);
+                });
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('api/dashboard.php');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Update dashboard statistics
+                updateDashboardStats(data);
+                
+                // Update charts with new data
+                updateCharts(data);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                alert('Error loading dashboard data. Please try again later.');
+            }
+        }
+
+        function updateDashboardStats(data) {
+            // Update statistics cards
+            document.getElementById('totalAppointments').textContent = data.totalAppointments || 0;
+            document.getElementById('totalRevenue').textContent = `$${data.totalRevenue || 0}`;
+            document.getElementById('averageRating').textContent = data.averageRating || '0.0';
+            document.getElementById('totalClients').textContent = data.totalClients || 0;
+            
+            // Update total services count
+            document.getElementById('total-services').textContent = data.totalServices || 0;
+        }
+
+        function initializeCharts() {
+            // Initialize all charts with empty data
+            const ctx1 = document.getElementById('appointmentsChart');
+            const ctx2 = document.getElementById('revenueChart');
+            const ctx3 = document.getElementById('ratingChart');
+
+            if (ctx1) {
+                window.appointmentsChart = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Appointments',
+                            data: [],
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            if (ctx2) {
+                window.revenueChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: [],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            if (ctx3) {
+                window.ratingChart = new Chart(ctx3, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'],
+                        datasets: [{
+                            data: [0, 0, 0, 0, 0],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(255, 159, 64, 0.5)',
+                                'rgba(255, 99, 132, 0.5)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        function updateCharts(data) {
+            // Update appointments chart
+            if (window.appointmentsChart && data.appointmentsData) {
+                window.appointmentsChart.data.labels = data.appointmentsData.labels;
+                window.appointmentsChart.data.datasets[0].data = data.appointmentsData.values;
+                window.appointmentsChart.update();
+            }
+
+            // Update revenue chart
+            if (window.revenueChart && data.revenueData) {
+                window.revenueChart.data.labels = data.revenueData.labels;
+                window.revenueChart.data.datasets[0].data = data.revenueData.values;
+                window.revenueChart.update();
+            }
+
+            // Update rating chart
+            if (window.ratingChart && data.ratingData) {
+                window.ratingChart.data.datasets[0].data = data.ratingData;
+                window.ratingChart.update();
+            }
+        }
+
+        // Analytics functionality
+        let revenueTrendChart, orderStatusChart, servicePopularityChart;
+
+        function renderAnalyticsCharts(data) {
+            // Revenue Trend
+            const ctx1 = document.getElementById('revenueTrendChart').getContext('2d');
+            if (revenueTrendChart) revenueTrendChart.destroy();
+            revenueTrendChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: (data.revenue_trend || []).map(x => x.month),
+                    datasets: [{
+                        label: 'Revenue',
+                        data: (data.revenue_trend || []).map(x => x.revenue),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52,152,219,0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {responsive:true, plugins:{legend:{display:false}}}
+            });
+            // Order Status
+            const ctx2 = document.getElementById('orderStatusChart').getContext('2d');
+            if (orderStatusChart) orderStatusChart.destroy();
+            const statusLabels = Object.keys(data.order_status||{});
+            const statusData = Object.values(data.order_status||{});
+            orderStatusChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: ['#2ecc71','#f1c40f','#e74c3c','#3498db','#9b59b6'],
+                    }]
+                },
+                options: {responsive:true, plugins:{legend:{position:'right'}}}
+            });
+            // Service Popularity
+            const ctx3 = document.getElementById('servicePopularityChart').getContext('2d');
+            if (servicePopularityChart) servicePopularityChart.destroy();
+            servicePopularityChart = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: (data.service_popularity||[]).map(x=>x.service),
+                    datasets: [{
+                        data: (data.service_popularity||[]).map(x=>x.count),
+                        backgroundColor: '#9b59b6',
+                        borderRadius: 5
+                    }]
+                },
+                options: {responsive:true, plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+            });
+        }
+
+        async function fetchSimpleAnalytics() {
+            if (!currentUserData || !currentUserData.id) {
+                alert('Provider ID not loaded. Please log in again.');
+                return;
+            }
+            try {
+                const response = await fetch('get_provider_analytics.php?provider_id=' + encodeURIComponent(currentUserData.id));
+                if (!response.ok) throw new Error('Failed to fetch analytics');
+                const data = await response.json();
+                document.getElementById('sa-total-revenue').textContent = data.total_revenue !== undefined ? '₹' + data.total_revenue : '--';
+                document.getElementById('sa-total-orders').textContent = data.total_orders !== undefined ? data.total_orders : '--';
+                document.getElementById('sa-avg-rating').textContent = data.avg_rating !== undefined ? data.avg_rating : '--';
+                document.getElementById('sa-popular-service').textContent = data.popular_service || '--';
+                renderAnalyticsCharts(data);
+            } catch (error) {
+                document.getElementById('sa-total-revenue').textContent = '--';
+                document.getElementById('sa-total-orders').textContent = '--';
+                document.getElementById('sa-avg-rating').textContent = '--';
+                document.getElementById('sa-popular-service').textContent = '--';
+                if (window.revenueTrendChart) revenueTrendChart.destroy();
+                if (window.orderStatusChart) orderStatusChart.destroy();
+                if (window.servicePopularityChart) servicePopularityChart.destroy();
+                console.error('Error fetching analytics:', error);
+            }
+        }
+
+        // Analytics menu click handler
+        document.getElementById('analytics-menu').addEventListener('click', function() {
+            // Always show analytics section and load data
+            const sections = document.querySelectorAll('.main-content > div');
+            sections.forEach(section => section.classList.remove('active-section'));
+            document.getElementById('analytics').classList.add('active-section');
+            fetchSimpleAnalytics();
+        });
+
+        // Modify the sidebar menu click handler
+        function setupBaseEventListeners() {
+            // ... (other listeners like sidebar toggle, theme, profile) ...
+
+            // Sidebar menu item click functionality
+            document.querySelectorAll('.sidebar nav ul li a').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+
+                    // Handle section switching
+                    const sections = document.querySelectorAll('.main-content > div');
+                    sections.forEach(section => section.classList.remove('active-section'));
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.classList.add('active-section');
+                    }
+
+                    // Reset analytics flag for all clicks initially
+                    isAnalyticsActive = false; 
+
+                    // Special handling for specific sections
+                    if (targetId === 'analytics') {
+                        isAnalyticsActive = true; // Set flag ONLY for analytics
+                        fetchSimpleAnalytics(); // Load analytics data
+                    } else if (targetId === 'logout') {
+                        window.location.href = 'logout.php'; // Or trigger logout logic
+                    }
+                    // Add other section-specific loads here if needed (e.g., loadOrders())
+                });
+            });
+
+            // ... (rest of base event listeners like view all orders, photo preview, etc.) ...
+        }
+
+        // Remove the separate listener for non-analytics items
+        // document.querySelectorAll('.sidebar nav ul li a:not(#analytics-menu)').forEach(item => {
+        //     item.addEventListener('click', function() {
+        //         isAnalyticsActive = false;
+        //     });
+        // });
+
+        // ---> Listener for button within View Profile section to go to Edit Profile <--- 
+        const goToEditBtn = document.getElementById('go-to-edit-profile-btn');
+        if (goToEditBtn) {
+             goToEditBtn.addEventListener('click', function() {
+                 const sections = document.querySelectorAll('.main-content > div:not(.navbar)'); // Exclude navbar
+                 sections.forEach(section => section.classList.remove('active-section'));
+                 document.getElementById('edit-profile').classList.add('active-section');
+             });
+        }
+        
+        // Initialize charts when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all charts only
+            initializeCharts();
+            // DO NOT load analytics data here
+        });
+
+        // Update the analytics menu click handler to load data
+        document.getElementById('analytics-menu').addEventListener('click', function() {
+            // First show the analytics section
+            const sections = document.querySelectorAll('.main-content > div');
+            sections.forEach(section => section.classList.remove('active-section'));
+            document.getElementById('analytics').classList.add('active-section');
+            
+            // Then load the data
+            fetchSimpleAnalytics();
+        });
+
+        // Initialize charts and load initial data when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all charts
+            initializeCharts();
+            
+            // Initialize service count by fetching services
+            // This will update the total-services counter on the dashboard
+            fetchServices();
+            
+            // DO NOT load analytics data here (that happens only when analytics tab is clicked)
+        });
+
+        // Previous duplicate DOMContentLoaded listener removed
+
+        // Function to directly update the service count
+        function updateServiceCount() {
+            fetch('manage_services.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ action: 'fetchServices' }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.services) {
+                    // Update all elements with total-services ID
+                    const totalServicesElements = document.querySelectorAll('#total-services, .total-services');
+                    totalServicesElements.forEach(element => {
+                        if (element) element.textContent = data.services.length;
+                    });
+                    console.log('Updated service count to:', data.services.length);
+                }
+            })
+            .catch(error => console.error('Error updating service count:', error));
+        }
+        
+        // Call this when the page is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            updateServiceCount(); // Update service count on page load
+        });
+
+        // --- ORDERS FETCH/UPDATE LOGIC ---
+        async function fetchOrders() {
+            try {
+                const response = await fetch('service_provider_dashboard.php');
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                const dashboardData = await response.json();
+                // Update stat card
+                if (dashboardData && dashboardData.stats) {
+                    const totalOrders = dashboardData.stats.totalOrders || 0;
+                    const totalOrdersCard = document.getElementById('total-orders');
+                    if (totalOrdersCard) totalOrdersCard.textContent = totalOrders;
+                }
+                // Update recent orders list
+                const recentOrdersList = document.getElementById('recent-orders-list');
+                if (recentOrdersList && dashboardData.orders && dashboardData.orders.length > 0) {
+                    recentOrdersList.innerHTML = '';
+                    dashboardData.orders.slice(0, 3).forEach(order => {
+                        const li = document.createElement('li');
+                        li.textContent = `Order #${order.order_id || '?'}: ${order.service_name || 'Service'} for ${order.customer_name || 'Customer'} (${order.status || 'status?'})`;
+                        recentOrdersList.appendChild(li);
+                    });
+                } else if (recentOrdersList) {
+                    recentOrdersList.innerHTML = '<li>No recent orders found.</li>';
+                }
+                // Update orders table
+                const ordersTableBody = document.getElementById('orders-table-body');
+                if (ordersTableBody) {
+                    ordersTableBody.innerHTML = '';
+                    if (dashboardData.orders && dashboardData.orders.length > 0) {
+                        dashboardData.orders.forEach(order => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${order.order_id}</td>
+                                <td>${order.customer_name}</td>
+                                <td>${order.service_name}</td>
+                                <td>${order.customer_address ? order.customer_address : ''} <button class="btn btn-sm btn-info locate-btn" data-location="${order.customer_address ? encodeURIComponent(order.customer_address) : ''}">Locate</button></td>
+                                <td>${order.status}</td>
+                                <td>${order.request_date ? new Date(order.request_date).toLocaleString() : ''}</td>
+                                <td>
+                                    <select class="order-status-dropdown" data-order-id="${order.order_id}">
+                                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="accepted" ${order.status === 'accepted' ? 'selected' : ''}>Accepted</option>
+                                        <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                </td>
+                            `;
+                            ordersTableBody.appendChild(tr);
+                        });
+                        // Add event listeners for locate buttons
+                        document.querySelectorAll('.locate-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const location = this.getAttribute('data-location');
+                                if (location) {
+                                    window.open(`https://www.google.com/maps/search/?api=1&query=${location}`, '_blank');
+                                }
+                            });
+                        });
+                        // Add event listeners for status dropdowns
+                        document.querySelectorAll('.order-status-dropdown').forEach(dropdown => {
+                            dropdown.addEventListener('change', function() {
+                                const orderId = this.getAttribute('data-order-id');
+                                const newStatus = this.value;
+                                updateOrderStatusDropdown(orderId, newStatus);
+                            });
+                        });
+                    } else {
+                        ordersTableBody.innerHTML = '<tr><td colspan="6">No orders found.</td></tr>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        }
+
+        // Dropdown-based order status update
+        window.updateOrderStatusDropdown = function(orderId, newStatus) {
+            fetch('update_booking.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ order_id: orderId, status: newStatus })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Order status updated!');
+                    fetchOrders();
+                } else {
+                    alert('Failed to update order: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Error updating order: ' + err));
+        }
+
+        // Manual refresh button for orders
+        function addOrdersRefreshButton() {
+            const ordersSection = document.querySelector('#orders .table-container');
+            if (ordersSection && !document.getElementById('refresh-orders-btn')) {
+                const btn = document.createElement('button');
+                btn.id = 'refresh-orders-btn';
+                btn.className = 'btn btn-sm btn-refresh';
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Orders';
+                btn.onclick = fetchOrders;
+                ordersSection.prepend(btn);
+            }
+        }
+
+        // Call fetchOrders on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchOrders();
+            addOrdersRefreshButton();
+        });
+
+        // Call fetchOrders when switching to Orders tab
+        const ordersMenu = document.getElementById('orders-menu');
+        if (ordersMenu) {
+            ordersMenu.addEventListener('click', fetchOrders);
+        }
+
+        // Also call fetchOrders after any order update (implement updateOrderStatus as needed)
+        window.updateOrderStatus = function(orderId) {
+            // Example: show a prompt and update status via API, then refresh orders
+            const newStatus = prompt('Enter new status for order #' + orderId + ' (pending/completed/cancelled):');
+            if (!newStatus) return;
+            fetch('update_booking.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ order_id: orderId, status: newStatus })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Order updated!');
+                    fetchOrders();
+                } else {
+                    alert('Failed to update order: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Error updating order: ' + err));
+        }
+    </script>
+</body>
+</html>
